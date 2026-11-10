@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Plan Estratégico Anual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#F2F5F3; --surface:#FFFFFF; --surface-2:#E9EEEB; --field:#FAFCFB;
+  --ink:#14201B; --ink-2:#4B5C54; --ink-3:#6F8078; --line:#D3DCD8; --line-2:#E3E9E6;
+  --accent:#0B6E4F; --accent-ink:#FFFFFF; --accent-soft:#DBEEE5;
+  --good:#1D7A43; --good-bg:#DCF1E3; --warn:#8F5E00; --warn-bg:#FAEDD2; --bad:#B32A1E; --bad-bg:#FBE2DE; --sgood:#0B5E8A; --sgood-bg:#DCEBF6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --splan:#B7C2BD; --grid:#E4EAE7; --axis:#C3CCC8;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0D1411; --surface:#151F1B; --surface-2:#1C2924; --field:#111A16;
+    --ink:#E5EEE9; --ink-2:#A2B4AC; --ink-3:#7F9189; --line:#2A3A34; --line-2:#22302B;
+    --accent:#3DC18E; --accent-ink:#05130D; --accent-soft:#16372B;
+    --good:#5ACF8B; --good-bg:#153322; --warn:#E6B34F; --warn-bg:#382C12; --bad:#F2806F; --bad-bg:#3B1C18; --sgood:#6CB8F0; --sgood-bg:#13293A;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --splan:#4A5B54; --grid:#22302B; --axis:#34453E;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0D1411; --surface:#151F1B; --surface-2:#1C2924; --field:#111A16;
+  --ink:#E5EEE9; --ink-2:#A2B4AC; --ink-3:#7F9189; --line:#2A3A34; --line-2:#22302B;
+  --accent:#3DC18E; --accent-ink:#05130D; --accent-soft:#16372B;
+  --good:#5ACF8B; --good-bg:#153322; --warn:#E6B34F; --warn-bg:#382C12; --bad:#F2806F; --bad-bg:#3B1C18; --sgood:#6CB8F0; --sgood-bg:#13293A;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --splan:#4A5B54; --grid:#22302B; --axis:#34453E;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:16px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top-row{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding-block:12px 8px}
+.brand{display:flex;align-items:center;gap:6px 10px;min-width:0;flex:1 1 260px;flex-wrap:wrap}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:26px;margin:0;text-transform:uppercase;line-height:1;white-space:nowrap}
+.brand .co{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.yearsel{display:flex;align-items:center;gap:6px}
+.yearsel select{font-family:var(--f-mono);font-weight:500;background:var(--ink);color:var(--bg);border:0;border-radius:5px;padding:4px 8px;cursor:pointer}
+.tag{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.tag.ej{background:var(--warn-bg);color:var(--warn)}
+.status{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--ink-3);display:inline-block}
+.status[data-s="saved"] i{background:var(--good)}
+.status[data-s="saving"] i{background:var(--warn)}
+.status[data-s="error"] i,.status[data-s="ro"] i{background:var(--bad)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-bottom:-1px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:9px 11px 10px;white-space:nowrap;cursor:pointer;color:var(--ink-2);font-weight:500;border-bottom:3px solid transparent}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+main{padding-block:22px 60px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sec-head h2{font-family:var(--f-display);font-size:30px;font-weight:700;margin:0;text-transform:uppercase;line-height:1.05;text-wrap:balance}
+.sec-head p{margin:4px 0 0;color:var(--ink-2);max-width:70ch}
+.sub-head{margin:28px 0 12px}
+.sub-head h3{font-family:var(--f-display);font-size:22px;font-weight:700;margin:0;text-transform:uppercase}
+.sub-head p{margin:2px 0 0;color:var(--ink-2);font-size:14px;max-width:70ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin-bottom:6px}
+.hint{font-size:13px;color:var(--ink-3)}
+.muted{color:var(--ink-3)}
+.empty{color:var(--ink-3);font-style:italic;font-size:14px}
+
+.fld{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+.fld:hover{border-color:var(--ink-3)}
+.fld:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.fld::placeholder{color:var(--ink-3);font-style:italic}
+textarea.fld{resize:vertical;min-height:64px;line-height:1.45}
+.num{font-family:var(--f-mono);font-size:14px;text-align:right;font-variant-numeric:tabular-nums}
+.fld.bare{background:transparent;border-color:transparent;padding:6px 8px}
+.fld.bare:hover{border-color:var(--line)}
+.fld.bare:focus{background:var(--field);border-color:var(--accent)}
+.fld:disabled{opacity:.8;cursor:default}
+select.fld{padding-right:24px}
+.w-auto{width:auto}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:7px 12px;cursor:pointer;font-weight:500;font-size:14px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{color:var(--ink);background:var(--surface-2)}
+.btn.small{padding:4px 9px;font-size:13px}
+.btn[data-armed="1"]{background:var(--bad);color:#fff;border-color:var(--bad)}
+.x{border:0;background:none;color:var(--ink-3);cursor:pointer;width:28px;height:28px;border-radius:5px;font-size:18px;line-height:1;flex:none}
+.x:hover{color:var(--bad);background:var(--bad-bg)}
+.linkbtn{border:0;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:13px;font-weight:600}
+
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.t th{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);text-align:left;padding:8px;border-bottom:2px solid var(--line);white-space:nowrap}
+.t th.r,.t td.r{text-align:right}
+.t td{padding:4px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.t tr.sum td{background:var(--surface-2);font-weight:600}
+.t tr.sub td{color:var(--ink-2)}
+.t tr.grp td{padding-top:14px;border-bottom:0}
+.calc{font-family:var(--f-mono);font-size:14px;padding:6px 8px;text-align:right;white-space:nowrap;display:inline-block}
+.t td.lbl{padding-left:8px;white-space:nowrap}
+.t .tot{border-left:2px solid var(--line)}
+
+.pill{display:inline-block;font-family:var(--f-mono);font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.pill[data-s="good"],.pill[data-s="verde"],.pill[data-s="hecho"]{background:var(--good-bg);color:var(--good)}
+.pill[data-s="bad"],.pill[data-s="rojo"]{background:var(--bad-bg);color:var(--bad)}
+.pill[data-s="warn"],.pill[data-s="amarillo"]{background:var(--warn-bg);color:var(--warn)}
+.pill[data-s="super"]{background:var(--sgood-bg);color:var(--sgood)}
+select.estado{-webkit-appearance:none;appearance:none;font-family:var(--f-body);font-size:13px;font-weight:600;border-radius:999px;padding:5px 26px 5px 12px;border:1px solid var(--line);cursor:pointer;
+  background-color:var(--surface-2);color:var(--ink-2);background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 13px) 55%,calc(100% - 9px) 55%;background-size:4px 4px,4px 4px;background-repeat:no-repeat}
+select.estado[data-s="verde"]{background-color:var(--good-bg);color:var(--good);border-color:var(--good)}
+select.estado[data-s="hecho"]{background-color:var(--good);color:var(--surface);border-color:var(--good)}
+select.estado[data-s="amarillo"]{background-color:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+select.estado[data-s="rojo"]{background-color:var(--bad-bg);color:var(--bad);border-color:var(--bad)}
+select.estado option{background:var(--surface);color:var(--ink)}
+.light{width:14px;height:14px;border-radius:50%;background:var(--line);flex:none;box-shadow:0 0 0 3px var(--surface-2)}
+.rock[data-s="verde"] .light,.rock[data-s="hecho"] .light{background:var(--good);box-shadow:0 0 0 3px var(--good-bg)}
+.rock[data-s="amarillo"] .light{background:var(--warn);box-shadow:0 0 0 3px var(--warn-bg)}
+.rock[data-s="rojo"] .light{background:var(--bad);box-shadow:0 0 0 3px var(--bad-bg)}
+.rock[data-s="verde"]{border-color:var(--good)} .rock[data-s="hecho"]{border-color:var(--good);background:var(--good-bg)}
+.rock[data-s="amarillo"]{border-color:var(--warn)} .rock[data-s="rojo"]{border-color:var(--bad)}
+.rock[data-s="hecho"] .n{color:var(--good)}
+
+/* FDT */
+.fdt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fdt .q{border-radius:10px;padding:14px;border:1px solid var(--line);background:var(--surface)}
+.fdt h3{font-family:var(--f-display);font-size:20px;margin:0 0 2px;text-transform:uppercase}
+.fdt .kind{font-size:12.5px;color:var(--ink-3);margin-bottom:10px}
+.fdt .f h3{color:var(--good)} .fdt .d h3{color:var(--warn)} .fdt .t h3{color:var(--s1)}
+.li{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.li .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+
+/* Rocks */
+.qtabs{display:flex;gap:6px;flex-wrap:wrap}
+.chip-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13.5px;font-weight:500}
+.chip-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.qgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr);gap:16px;align-items:start}
+.cn-scale{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}
+.cn-scale div{border-radius:6px;padding:6px 8px;font-size:12px;font-weight:600}
+.cn-scale .r{background:var(--bad-bg);color:var(--bad)} .cn-scale .a{background:var(--warn-bg);color:var(--warn)} .cn-scale .v{background:var(--good-bg);color:var(--good)} .cn-scale .s{background:var(--sgood-bg);color:var(--sgood)}
+.cn-scale input{margin-top:4px;padding:4px 6px}
+.rock{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px 10px;align-items:end;background:var(--surface)}
+.rock .n{align-self:start}
+.rock .n{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.6;color:var(--ink-3)}
+.rock .meta{grid-column:2 / 4;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:8px}
+.fl{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fl>span{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);line-height:1.2}
+.li.lab{align-items:flex-end}
+.li.lab .fl{flex:1}
+.kpi-top .fl.name{flex:1 1 220px}
+.rock .meta select{width:100%}
+.rock .fld{font-size:14px}
+.warnbox{background:var(--warn-bg);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:14px}
+
+/* Colecciones */
+.gantt{display:grid;grid-template-columns:minmax(140px,1.1fr) repeat(4,minmax(110px,1fr));border:1px solid var(--line);border-radius:10px;background:var(--surface);min-width:640px}
+.gantt>div{padding:8px 10px;border-bottom:1px solid var(--line-2);border-left:1px solid var(--line-2);display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start}
+.gantt .gh{background:var(--surface-2);font-weight:600;font-size:13px;border-bottom:2px solid var(--line)}
+.gantt .gn{font-weight:600;border-left:0;flex-direction:column;gap:0}
+.stg{font-size:12px;padding:2px 7px;border-radius:5px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
+.stg[data-e="1"]{background:var(--warn-bg);color:var(--warn)}
+.stg[data-e="2"]{background:var(--good-bg);color:var(--good);text-decoration:line-through;text-decoration-thickness:1px}
+.stgcell{display:flex;gap:4px;align-items:center}
+.stbtn{border:0;cursor:pointer;width:20px;height:20px;border-radius:50%;border:2px solid var(--ink-3);background:transparent;flex:none;position:relative}
+.stbtn[data-e="1"]{border-color:var(--warn);background:linear-gradient(90deg,var(--warn) 50%,transparent 50%)}
+.stbtn[data-e="2"]{border-color:var(--good);background:var(--good)}
+
+/* KPI cards */
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.kpi-top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.kpi-top .name{flex:1 1 220px;font-weight:600}
+.kpi table{min-width:560px}
+
+/* Dashboard */
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;padding:12px 16px;margin-bottom:18px}
+.banner b{color:var(--warn)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile .k{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.tile .v{font-family:var(--f-display);font-weight:700;font-size:34px;line-height:1.1;margin-top:4px}
+.tile .s{font-size:13px;color:var(--ink-2)}
+.delta{font-family:var(--f-mono);font-size:12.5px;font-weight:500}
+.delta.up{color:var(--good)} .delta.down{color:var(--bad)}
+.quarters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.qc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:9px}
+.qc.now{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.qc .qh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.qc .qn{font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1}
+.qc .tema{font-weight:600;min-height:1.4em}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;border-top:1px solid var(--line-2);padding-top:6px}
+.kv>span:first-child{color:var(--ink-2)}
+.kv>span:last-child{font-family:var(--f-mono);font-size:13px;text-align:right}
+.h3{font-family:var(--f-display);font-size:20px;font-weight:700;text-transform:uppercase;margin:0 0 10px}
+
+/* One page */
+.opsp{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.opsp .col{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.opsp .col h3{font-family:var(--f-display);font-size:19px;margin:0;text-transform:uppercase;display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.opsp .col h3 small{font-family:var(--f-body);font-size:11px;letter-spacing:.06em;color:var(--ink-3)}
+.opsp ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.opsp .big{font-weight:600}
+.opsp .box{background:var(--surface-2);border-radius:8px;padding:8px 10px}
+
+/* Charts */
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:16px}
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 16px 12px;min-width:0}
+.chart h3{margin:0;font-size:16px;font-weight:600}
+.chart .cs{font-size:13px;color:var(--ink-2);margin:2px 0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink-2);margin-bottom:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.legend i.ln{height:3px;border-radius:2px}
+.cbox{position:relative;width:100%}
+.cbox svg{display:block;width:100%;height:auto;overflow:visible}
+.cbox text{font-family:var(--f-body);font-size:12px;fill:var(--ink-3)}
+.cbox .hit{fill:transparent;cursor:crosshair}
+.cbox .hit:hover{fill:var(--ink);fill-opacity:.04}
+.tip{position:fixed;z-index:60;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px;line-height:1.35;max-width:240px;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.tip b{display:block;margin-bottom:2px}
+.tip .row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.tip .row i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:5px}
+.tip .row span:last-child{font-family:var(--f-mono);font-size:12px}
+details.data summary{cursor:pointer;font-size:13px;color:var(--ink-2);margin-top:6px}
+details.data table{margin-top:6px;font-size:13px}
+.nodata{padding:30px 0;text-align:center;color:var(--ink-3);font-style:italic}
+
+/* Years panel */
+.overlay{position:fixed;inset:0;background:rgba(10,18,14,.45);z-index:40;display:flex;align-items:flex-start;justify-content:center;padding:calc(60px + env(safe-area-inset-top,0px)) 16px 16px;overflow:auto}
+.modal{background:var(--surface);border-radius:12px;border:1px solid var(--line);width:100%;max-width:640px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h2{font-family:var(--f-display);font-size:26px;text-transform:uppercase;margin:0 0 4px}
+.yrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line-2)}
+.yrow .y{font-family:var(--f-mono);font-weight:500;font-size:16px;min-width:52px}
+.yrow .sp{flex:1}
+.newyear{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:14px;z-index:70}
+body.ro #app .x,body.ro #app .add,body.ro #app [data-act]:not([data-safe]){pointer-events:none;opacity:.5}
+.robar{background:var(--surface-2);border-radius:8px;padding:8px 12px;font-size:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+@media (max-width:900px){ .quarters{grid-template-columns:repeat(2,minmax(0,1fr))} .qgrid{grid-template-columns:1fr} .fdt{grid-template-columns:1fr} }
+@media (max-width:560px){
+  .quarters{grid-template-columns:1fr}
+  .brand h1{font-size:22px}
+  .brand .co{display:none}
+  .sec-head h2{font-size:26px}
+  .rock .meta{grid-template-columns:1fr 1fr}
+  .rock .meta .wide{grid-column:1 / -1}
+}
+/* sign-in */
+body{margin:0}
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--bg)}
+.gate .card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px}
+.gate h1{font-family:var(--f-display);font-size:30px;text-transform:uppercase;margin:0 0 6px;line-height:1}
+.gate form{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.gate .linkbtn{align-self:center}
+body.gated .top,body.gated main{display:none}
+#who{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:560px){#who{display:none}}
+.status[data-s="offline"] i{background:var(--warn)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div id="gate" class="gate" hidden></div>
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="brand"><h1>Plan estratégico</h1>
+        <div class="yearsel"><label for="year-select" class="hint" style="position:absolute;left:-9999px">Año del plan</label><select id="year-select"></select><span id="year-tag"></span></div>
+        <span class="co" id="hdr-co"></span></div>
+      <div class="status" id="status" data-s="loading"><i></i><span id="status-t">Cargando…</span></div>
+      <button class="btn small" id="btn-years" data-safe="1">Años y respaldos</button>
+      <span class="hint" id="who"></span>
+      <button class="btn small ghost" id="btn-logout">Salir</button>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones del plan"></nav>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<div id="overlay-root"></div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+(function(){
+"use strict";
+/* ============ constants ============ */
+const TABS=[["tablero","Tablero"],["unapagina","Plan en una página"],["estrategia","Estrategia"],["fdt","FDT"],["objetivos","Objetivos"],["rocks","Rocks T1–T4"],["colecciones","Colecciones"],["kpis","KPIs y capacidad"],["presupuesto","Presupuesto"],["efectivo","Efectivo"],["personas","Personas"],["riesgos","Riesgos y ritmo"],["graficas","Gráficas"]];
+const QM=["ene – mar","abr – jun","jul – sep","oct – dic"];
+const ROCK_E=[["sin","Sin iniciar"],["verde","En camino"],["amarillo","En riesgo"],["rojo","Atrasado"],["hecho","Hecho"]];
+const ETAPAS=["Diseño","Muestras","Compra de tela","Producción","Lanzamiento"];
+const EST3=["Pendiente","En curso","Hecho"];
+const uid=()=>Math.random().toString(36).slice(2,9);
+const n4=()=>[null,null,null,null];
+const THIS_YEAR=new Date().getFullYear();
+
+function blank(anio){
+  return {v:2,anio:anio,ejemplo:false,cerrado:false,
+    empresa:{nombre:"",giro:"Marca de ropa de ciclismo (diseño, fabricación y venta)",responsable:"",resumen:"",colaboradores:null},
+    estrategia:{proposito:"",valores:["","",""],bhag:"",metas35:[{id:uid(),meta:"",indicador:""},{id:uid(),meta:"",indicador:""}],cliente:"",palabras:"",terreno:"",
+      promesas:[{id:uid(),promesa:"",kpi:""}],garantia:"",frase:"",actividades:["","",""],factorX:"",utilidadX:""},
+    fdt:{f:["","",""],d:["","",""],t:["","",""]},
+    objetivos:[0,1,2].map(()=>({id:uid(),obj:"",indicador:"",meta:"",resp:""})),
+    trimestres:[0,1,2,3].map(()=>({tema:"",cn:{nombre:"",mayor:true,amarillo:null,verde:null,super:null,real:null,recompensa:""},rocks:[]})),
+    colecciones:[],
+    kpis:[["Margen bruto","%","Promedio",false],["Costo unitario promedio por prenda","Q","Promedio",true],["Días de entrega de uniformes de club","#","Promedio",true],["Prendas con defecto","%","Promedio",true],["Sell-through de colección","%","Promedio",false],["Clientes recurrentes","%","Promedio",false],["Cambios o devoluciones por talla","%","Promedio",true]]
+      .map(([n,u,t,m])=>({id:uid(),nombre:n,unidad:u,tipo:t,menor:m,meta:n4(),real:n4()})),
+    capacidad:{cap:n4(),dem:n4()},
+    presupuesto:{
+      canales:["Tienda propia","Tienda en línea","Mayoreo a tiendas de bicicletas","Uniformes de club y equipos"].map(n=>({id:uid(),nombre:n,v:n4(),r:n4()})),
+      costos:["Tela y materiales","Mano de obra","Sublimación y maquila","Empaque y etiquetas"].map(n=>({id:uid(),nombre:n,v:n4(),r:n4()})),
+      gastos:["Sueldos administrativos y ventas","Alquiler y servicios","Marketing y comunidad","Tecnología y tienda en línea","Otros gastos operativos"].map(n=>({id:uid(),nombre:n,v:n4(),r:n4()})),
+      inversiones:{v:n4(),r:n4()}},
+    efectivo:{dc:null,di:null,dp:null,base:"plan",pal:{precio:1,volumen:1,costo:1,gastos:1,dc:1,di:1,dp:1}},
+    personas:{face:["Diseño y desarrollo","Producción","Compras y materia prima","Ventas mayoreo y clubes","Marketing y comunidad","Tienda en línea","Finanzas"].map(f=>({id:uid(),funcion:f,resp:"",kpis:""})),
+      pace:[{id:uid(),proceso:"Del pedido del club a la entrega",dueno:"",pasos:"",kpi:""},{id:uid(),proceso:"Del diseño al lanzamiento de una colección",dueno:"",pasos:"",kpi:""}]},
+    riesgos:[],
+    ritmo:[["Reunión diaria","Todos los días, 15 min","",""],["Reunión semanal","Lunes, 60–90 min","","Rocks en semáforo, KPIs, pedidos de club, producción"],["Reunión mensual","Primer lunes, medio día","","Resultados del mes, aprendizajes, ajustes"],["Planeación trimestral","Última semana del trimestre, 1 día","","Revisar Rocks y número crítico; definir los del siguiente trimestre"],["Planeación anual","Noviembre, 2 días","","Actualizar la estrategia y crear el plan del siguiente año"]]
+      .map(([r,c,q,a])=>({id:uid(),reunion:r,cuando:c,quien:q,agenda:a})),
+    revisiones:[0,1,2,3].map(i=>({fecha:"",hecha:false,notas:""}))
+  };
+}
+function deepMerge(b,d){
+  if(Array.isArray(b)) return Array.isArray(d)?d:b;
+  if(b&&typeof b==="object"){const o={};for(const k of Object.keys(b)) o[k]=(d&&k in d)?deepMerge(b[k],d[k]):b[k];if(d&&typeof d==="object")for(const k of Object.keys(d)) if(!(k in o)) o[k]=d[k];return o;}
+  return d===undefined?b:d;
+}
+function normalize(d){
+  const b=blank(d&&d.anio||THIS_YEAR); const o=deepMerge(b,d||{});
+  if(!Array.isArray(o.trimestres)||o.trimestres.length!==4) o.trimestres=b.trimestres;
+  o.trimestres=o.trimestres.map((t,i)=>deepMerge(b.trimestres[i],t));
+  if(!Array.isArray(o.revisiones)||o.revisiones.length!==4) o.revisiones=b.revisiones;
+  for(const k of ["canales","costos","gastos"]) o.presupuesto[k]=(o.presupuesto[k]||[]).map(r=>({id:r.id||uid(),nombre:r.nombre||"",v:r.v||n4(),r:r.r||n4()}));
+  o.kpis=o.kpis.map(k=>Object.assign({id:uid(),nombre:"",unidad:"#",tipo:"Promedio",menor:false,meta:n4(),real:n4()},k));
+  o.colecciones=o.colecciones.map(c=>Object.assign({id:uid(),nombre:"",linea:"",unidades:null},c,{etapas:ETAPAS.map((_,i)=>Object.assign({q:"",e:0},(c.etapas||[])[i]||{}))}));
+  return o;
+}
+
+/* ============ state ============ */
+let years={};          // id -> data (from store)
+let cur=null;          // current year doc id "y2026"
+let state=normalize(blank(THIS_YEAR));
+let tab="tablero", qSel=null, pmode="plan", showYears=false;
+try{const t=localStorage.getItem("pe-tab"); if(t&&TABS.some(x=>x[0]===t)) tab=t; const pm=localStorage.getItem("pe-pmode"); if(pm) pmode=pm;}catch(e){}
+if(location.hash){const h=location.hash.slice(1); if(TABS.some(x=>x[0]===h)) tab=h;}
+const yid=a=>"y"+a;
+
+/* ============ helpers ============ */
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function get(p){return p.split(".").reduce((o,k)=>o==null?o:o[k],state)}
+function set(p,v){const ks=p.split(".");let o=state;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=v}
+const pid=p=>"f-"+p.replace(/\./g,"-");
+const nf=new Intl.NumberFormat("es-GT",{maximumFractionDigits:0});
+const nf1=new Intl.NumberFormat("es-GT",{maximumFractionDigits:1});
+const fQ=v=>v==null||isNaN(v)?"—":(v<0?"−":"")+"Q "+nf.format(Math.abs(v));
+const fQk=v=>{if(v==null||isNaN(v))return "—";const a=Math.abs(v),s=v<0?"−":"";return a>=1e6?s+"Q "+nf1.format(a/1e6)+" M":a>=1e3?s+"Q "+nf.format(a/1e3)+" k":s+"Q "+nf.format(a)};
+const fP=v=>v==null||!isFinite(v)?"—":nf.format(v*100)+" %";
+const fP1=v=>v==null||!isFinite(v)?"—":nf1.format(v*100)+" %";
+const fN=v=>v==null||isNaN(v)?"—":nf1.format(v);
+const fU=(v,u)=>u==="Q"?fQ(v):u==="%"?(v==null?"—":nf1.format(v)+" %"):fN(v);
+const z=v=>v==null||v===""||isNaN(v)?0:+v;
+const has=v=>v!=null&&v!==""&&!isNaN(v);
+const sum=a=>a.reduce((s,v)=>s+z(v),0);
+const ratio=(r,m)=>(!has(r)||!has(m)||+m===0)?null:(+r)/(+m);
+
+function ti(p,ph,cls,lbl){return `<input id="${pid(p)}" class="fld ${cls||""}" data-bind="${p}" value="${esc(get(p))}" placeholder="${esc(ph||"")}" aria-label="${esc(lbl||ph||"")}">`}
+function ta(p,ph,rows,cls){return `<textarea id="${pid(p)}" class="fld ${cls||""}" rows="${rows||3}" data-bind="${p}" placeholder="${esc(ph||"")}" aria-label="${esc(ph||"")}">${esc(get(p))}</textarea>`}
+function ni(p,ph,lbl){const v=get(p);return `<input id="${pid(p)}" type="number" inputmode="decimal" step="any" class="fld num" data-bind="${p}" data-t="num" value="${v==null?"":esc(v)}" placeholder="${esc(ph||"")}" aria-label="${esc(lbl||ph||"")}">`}
+function sel(p,opts,cls,lbl){const v=get(p);return `<select id="${pid(p)}" class="fld ${cls||""}" data-bind="${p}" aria-label="${esc(lbl||"")}">${opts.map(o=>{const [val,l]=Array.isArray(o)?o:[o,o];return `<option value="${esc(val)}"${String(v)===String(val)?" selected":""}>${esc(l)}</option>`}).join("")}</select>`}
+function chk(p,lbl){return `<label style="display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer"><input type="checkbox" id="${pid(p)}" data-bind="${p}" data-t="bool" ${get(p)?"checked":""}> ${lbl}</label>`}
+const fl=(lbl,html,cls)=>`<label class="fl ${cls||""}"><span>${lbl}</span>${html}</label>`;
+const calc=(k)=>`<span class="calc" data-calc="${k}">—</span>`;
+function head(t,p,extra){return `<div class="sec-head"><div><h2>${t}</h2>${p?`<p>${p}</p>`:""}</div>${extra||""}</div>`}
+function subhead(t,p,extra){return `<div class="sec-head sub-head"><div><h3>${t}</h3>${p?`<p>${p}</p>`:""}</div>${extra||""}</div>`}
+function curQ(d){d=d||state;if(+d.anio!==THIS_YEAR) return -1;return Math.floor(new Date().getMonth()/3);}
+function focusQ(){if(qSel!=null) return qSel;const c=curQ();return c<0?0:c;}
+function objLabel(id){const i=state.objetivos.findIndex(o=>o.id===id);return i<0?"":"O"+(i+1)}
+function listAdd(label,act,extra){return `<button class="btn ghost small add" data-act="${act}" ${extra||""}>+ ${label}</button>`}
+
+/* ============ computations ============ */
+function budget(d,mode){
+  const P=d.presupuesto,key=mode==="real"?"r":"v",r={ing:[],cos:[],ub:[],mb:[],gt:[],uo:[],mo:[],inv:[],fl:[],ac:[],hasData:[]};
+  let acc=0;
+  for(let q=0;q<4;q++){
+    const ing=P.canales.reduce((s,c)=>s+z(c[key][q]),0),cos=P.costos.reduce((s,c)=>s+z(c[key][q]),0),gt=P.gastos.reduce((s,g)=>s+z(g[key][q]),0),inv=z(P.inversiones[key][q]);
+    const ub=ing-cos,uo=ub-gt,fl=uo-inv; acc+=fl;
+    r.hasData.push(P.canales.some(c=>has(c[key][q])));
+    r.ing.push(ing);r.cos.push(cos);r.ub.push(ub);r.mb.push(ing?ub/ing:null);r.gt.push(gt);r.uo.push(uo);r.mo.push(ing?uo/ing:null);r.inv.push(inv);r.fl.push(fl);r.ac.push(acc);
+  }
+  const T=k=>r[k].reduce((a,b)=>a+z(b),0),ingT=T("ing"),ubT=T("ub"),uoT=T("uo");
+  r.T={ing:ingT,cos:T("cos"),ub:ubT,mb:ingT?ubT/ingT:null,gt:T("gt"),uo:uoT,mo:ingT?uoT/ingT:null,inv:T("inv"),fl:T("fl"),ac:acc};
+  return r;
+}
+function kpiYear(k,arr){
+  const vals=arr.filter(has); if(!vals.length) return null;
+  if(k.tipo==="Promedio") return vals.reduce((a,b)=>a+ +b,0)/vals.length;
+  if(k.tipo==="Último"){for(let i=3;i>=0;i--) if(has(arr[i])) return +arr[i];}
+  return vals.reduce((a,b)=>a+ +b,0);
+}
+function kpiPct(k,real,meta){ if(!has(real)||!has(meta)) return null; if(k.menor){ return +real===0?null:(+meta)/(+real);} return +meta===0?null:(+real)/(+meta); }
+const pctState=v=>v==null?"":v>=1?"good":v>=.9?"warn":"bad";
+function cnState(cn){
+  if(!has(cn.real)) return null; const r=+cn.real, M=cn.mayor!==false&&cn.mayor!=="false";
+  const ge=(a,b)=>has(b)&&(M?a>=+b:a<=+b);
+  if(ge(r,cn.super)) return "super"; if(ge(r,cn.verde)) return "verde"; if(ge(r,cn.amarillo)) return "amarillo"; return "rojo";
+}
+const CN_L={super:"Súper verde",verde:"Verde",amarillo:"Amarillo",rojo:"Rojo"};
+function rockStats(d,q){const list=q==null?d.trimestres.flatMap(t=>t.rocks):d.trimestres[q].rocks;return {t:list.length,d:list.filter(r=>r.estado==="hecho").length,risk:list.filter(r=>r.estado==="rojo"||r.estado==="amarillo").length}}
+function prevYear(){return years[yid(+state.anio-1)]?normalize(years[yid(+state.anio-1)]):null}
+function yearData(id){return id===cur?state:normalize(years[id])}
+function sortedYears(){const ids=new Set(Object.keys(years));if(cur) ids.add(cur);return [...ids].map(id=>+id.slice(1)).filter(n=>!isNaN(n)).sort((a,b)=>a-b);}
+
+function powerOfOne(d){
+  const e=d.efectivo,b=budget(d,e.base==="real"?"real":"plan").T;
+  const V=b.ing,C=b.cos,G=b.gt,DC=z(e.dc),DI=z(e.di),DP=z(e.dp),p=e.pal;
+  const pc=k=>z(p[k])/100, dd=k=>z(p[k]);
+  const L=[
+    {k:"precio",n:"Subir precio",u:"%",util:V*pc("precio"),cash:V*pc("precio")-V*pc("precio")*DC/365},
+    {k:"volumen",n:"Vender más unidades",u:"%",util:(V-C)*pc("volumen"),cash:(V-C)*pc("volumen")-V*pc("volumen")*DC/365-C*pc("volumen")*DI/365+C*pc("volumen")*DP/365},
+    {k:"costo",n:"Bajar costo de producción",u:"%",util:C*pc("costo"),cash:C*pc("costo")+C*pc("costo")*DI/365-C*pc("costo")*DP/365},
+    {k:"gastos",n:"Bajar gastos operativos",u:"%",util:G*pc("gastos"),cash:G*pc("gastos")},
+    {k:"dc",n:"Cobrar más rápido",u:"días",util:0,cash:V*dd("dc")/365},
+    {k:"di",n:"Menos días de inventario",u:"días",util:0,cash:C*dd("di")/365},
+    {k:"dp",n:"Más plazo con proveedores",u:"días",util:0,cash:C*dd("dp")/365}];
+  const ccc=(has(e.di)||has(e.dc)||has(e.dp))?DI+DC-DP:null;
+  const atrapado={inv:C*DI/365,cxc:V*DC/365,cxp:C*DP/365};atrapado.neto=atrapado.inv+atrapado.cxc-atrapado.cxp;
+  return {L,ccc,atrapado,V,C,G,uo:b.uo};
+}
+
+function runCalc(){
+  const M={},S={};
+  for(const mode of ["plan","real"]){const b=budget(state,mode),px=mode==="real"?"r":"p";
+    for(const k of ["ing","cos","ub","mb","gt","uo","mo","inv","fl","ac"]){
+      const f=(k==="mb"||k==="mo")?fP1:fQ;
+      for(let q=0;q<4;q++) M[`${px}.${k}.${q}`]=f(b[k][q]); M[`${px}.${k}.T`]=f(b.T[k]);
+    }
+    const key=mode==="real"?"r":"v";
+    for(const g of ["canales","costos","gastos"]) state.presupuesto[g].forEach((row,i)=>{M[`${px}.${g}${i}.T`]=fQ(sum(row[key]))});
+    M[`${px}.invrow.T`]=fQ(sum(state.presupuesto.inversiones[key]));
+  }
+  state.kpis.forEach((k,i)=>{
+    for(let q=0;q<4;q++){const r=kpiPct(k,k.real[q],k.meta[q]);M[`k${i}.p${q}`]=fP(r);S[`k${i}.p${q}`]=pctState(r);}
+    const my=kpiYear(k,k.meta),ry=kpiYear(k,k.real),py=kpiPct(k,ry,my);
+    M[`k${i}.my`]=fU(my,k.unidad);M[`k${i}.ry`]=fU(ry,k.unidad);M[`k${i}.py`]=fP(py);S[`k${i}.py`]=pctState(py);
+  });
+  const C=state.capacidad;
+  for(let q=0;q<4;q++){const u=ratio(C.dem[q],C.cap[q]);M[`cap.u${q}`]=fP(u);S[`cap.u${q}`]=u==null?"":u>1?"bad":u>.9?"warn":"good";}
+  M["cap.capT"]=fN(sum(C.cap));M["cap.demT"]=fN(sum(C.dem));{const u=ratio(sum(C.dem),sum(C.cap));M["cap.uT"]=fP(u);S["cap.uT"]=u==null?"":u>1?"bad":u>.9?"warn":"good";}
+  state.trimestres.forEach((t,q)=>{const s=cnState(t.cn);M[`cn${q}`]=s?CN_L[s]:"Sin dato";S[`cn${q}`]=s||"";});
+  if(tab==="efectivo"){
+    const P=powerOfOne(state);
+    M["po.V"]=fQ(P.V);M["po.C"]=fQ(P.C);M["po.G"]=fQ(P.G);M["po.uo"]=fQ(P.uo);
+    M["po.ccc"]=P.ccc==null?"—":nf.format(P.ccc)+" días";
+    M["po.inv"]=fQ(P.atrapado.inv);M["po.cxc"]=fQ(P.atrapado.cxc);M["po.cxp"]=fQ(-P.atrapado.cxp);M["po.neto"]=fQ(P.atrapado.neto);
+    let tu=0,tc=0;const mx=Math.max(1,...P.L.map(l=>Math.abs(l.cash)));
+    P.L.forEach(l=>{M[`po.${l.k}.u`]=fQ(l.util);M[`po.${l.k}.c`]=fQ(l.cash);tu+=l.util;tc+=l.cash;const bar=document.getElementById("pob-"+l.k);if(bar) bar.style.width=Math.max(0,Math.round(Math.abs(l.cash)/mx*100))+"%";});
+    M["po.tu"]=fQ(tu);M["po.tc"]=fQ(tc);
+    const nu=P.uo+tu;M["po.nuo"]=fQ(nu);
+  }
+  document.querySelectorAll("[data-calc]").forEach(el=>{
+    const k=el.dataset.calc; if(!(k in M)) return;
+    el.textContent=M[k];
+    if(el.classList.contains("pill")) el.dataset.s=S[k]||"";
+    el.style.color=(!el.classList.contains("pill")&&/^−/.test(M[k]))?"var(--bad)":"";
+  });
+  document.getElementById("hdr-co").textContent=state.empresa.nombre||"";
+}
+
+/* ============ charts ============ */
+const chartQueue=[];
+function niceScale(min,max,n){
+  if(min===max){max=min+1;}
+  const span=max-min,step0=span/(n||5),mag=Math.pow(10,Math.floor(Math.log10(step0))),err=step0/mag;
+  const step=(err>=7.5?10:err>=3.5?5:err>=1.5?2:1)*mag;
+  const lo=Math.floor(min/step)*step,hi=Math.ceil(max/step)*step,ticks=[];
+  for(let v=lo;v<=hi+step/2;v+=step) ticks.push(+v.toFixed(10));
+  return {lo,hi,ticks};
+}
+function barPath(x,y0,y1,w,r){ // rounded at data end (y1)
+  const h=Math.abs(y1-y0); r=Math.min(r,h,w/2); if(h<0.5) return "";
+  if(y1<y0) return `M${x},${y0}V${y1+r}Q${x},${y1} ${x+r},${y1}H${x+w-r}Q${x+w},${y1} ${x+w},${y1+r}V${y0}Z`;
+  return `M${x},${y0}V${y1-r}Q${x},${y1} ${x+r},${y1}H${x+w-r}Q${x+w},${y1} ${x+w},${y1-r}V${y0}Z`;
+}
+function chartCard(id,title,sub,spec){
+  chartQueue.push({id,spec});
+  const leg=spec.series.length>1?`<div class="legend">${spec.series.map(s=>`<span><i class="${spec.type==="line"?"ln":""}" style="background:${s.color}"></i>${esc(s.name)}</span>`).join("")}</div>`:"";
+  const fmt=spec.fmt||fQ;
+  const table=`<details class="data"><summary>Ver datos</summary><div class="tscroll"><table class="t"><thead><tr><th></th>${spec.series.map(s=>`<th class="r">${esc(s.name)}</th>`).join("")}</tr></thead><tbody>${spec.cats.map((c,i)=>`<tr><td class="lbl">${esc(c)}</td>${spec.series.map(s=>`<td class="r" style="font-family:var(--f-mono)">${s.values[i]==null?"—":fmt(s.values[i])}</td>`).join("")}</tr>`).join("")}</tbody></table></div></details>`;
+  const empty=!spec.series.some(s=>s.values.some(v=>v!=null&&v!==0));
+  return `<div class="chart"><h3>${title}</h3>${sub?`<div class="cs">${sub}</div>`:""}${empty?`<div class="nodata">${spec.empty||"Aún no hay datos para esta gráfica."}</div>`:leg+`<div class="cbox" id="${id}"></div>`+table}</div>`;
+}
+function drawCharts(){
+  for(const {id,spec} of chartQueue){
+    const box=document.getElementById(id); if(!box) continue;
+    const W=Math.max(280,box.clientWidth||520),H=spec.h||230,ml=spec.ml||58,mr=12,mt=10,mb=26;
+    const pw=W-ml-mr,ph=H-mt-mb, fmt=spec.fmt||fQ, afmt=spec.afmt||fQk;
+    const vals=[];spec.series.forEach(s=>s.values.forEach(v=>{if(v!=null)vals.push(v)}));
+    if(spec.stacked){spec.cats.forEach((_,i)=>vals.push(spec.series.reduce((a,s)=>a+z(s.values[i]),0)));}
+    let mn=Math.min(0,...vals),mx=Math.max(0,...vals); if(spec.type==="line"&&spec.fitMin){mn=Math.min(...vals);}
+    if(spec.minMax){mx=Math.max(mx,spec.minMax)}
+    const sc=niceScale(mn,mx,4), Y=v=>mt+ph-(v-sc.lo)/(sc.hi-sc.lo)*ph;
+    const n=spec.cats.length,band=pw/n;
+    let g=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(spec.aria||"")}">`;
+    sc.ticks.forEach(t=>{g+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(${t===0?"--axis":"--grid"})" stroke-width="1"/><text x="${ml-8}" y="${Y(t)+4}" text-anchor="end">${esc(afmt(t))}</text>`});
+    spec.cats.forEach((c,i)=>{g+=`<text x="${ml+band*i+band/2}" y="${H-8}" text-anchor="middle">${esc(c)}</text>`});
+    if(spec.type==="bar"){
+      const ns=spec.stacked?1:spec.series.length,gw=Math.min(band*0.72,ns*44),bw=(gw-(ns-1)*2)/ns;
+      spec.cats.forEach((_,i)=>{
+        const x0=ml+band*i+(band-gw)/2; let accP=0,accN=0;
+        spec.series.forEach((s,si)=>{const v=s.values[i]; if(v==null) return;
+          if(spec.stacked){const base=v>=0?accP:accN,top=base+v; const y0=Y(base),y1=Y(top); const last=spec.series.slice(si+1).every(t=>!z(t.values[i]));
+            g+= last?`<path d="${barPath(x0,y0,y1,gw,4)}" fill="${s.color}"/>`:`<rect x="${x0}" y="${Math.min(y0,y1)}" width="${gw}" height="${Math.max(0,Math.abs(y1-y0)-2)}" fill="${s.color}"/>`;
+            if(v>=0)accP=top;else accN=top;}
+          else{const x=x0+si*(bw+2);g+=`<path d="${barPath(x,Y(0),Y(v),bw,4)}" fill="${s.color}"/>`;}
+        });
+      });
+    } else {
+      spec.series.forEach(s=>{let d="";s.values.forEach((v,i)=>{if(v==null)return;const x=ml+band*i+band/2,y=Y(v);d+=(d&&s.values[i-1]!=null?"L":"M")+x+","+y});
+        g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+        s.values.forEach((v,i)=>{if(v==null)return;g+=`<circle cx="${ml+band*i+band/2}" cy="${Y(v)}" r="4.5" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`});
+      });
+      if(spec.refLine!=null){g+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(spec.refLine)}" y2="${Y(spec.refLine)}" stroke="var(--ink-3)" stroke-dasharray="4 4" stroke-width="1"/>`}
+    }
+    spec.cats.forEach((c,i)=>{g+=`<rect class="hit" data-ci="${i}" x="${ml+band*i}" y="${mt}" width="${band}" height="${ph}"/>`});
+    g+=`</svg>`; box.innerHTML=g; box._spec=spec;
+  }
+}
+const tip=document.getElementById("tip");
+document.addEventListener("pointermove",e=>{
+  const h=e.target.closest&&e.target.closest(".hit"); if(!h){tip.hidden=true;return;}
+  const box=h.closest(".cbox"),spec=box&&box._spec; if(!spec){tip.hidden=true;return;}
+  const i=+h.dataset.ci,fmt=spec.fmt||fQ;
+  let rows=spec.series.map(s=>`<div class="row"><span><i style="background:${s.color}"></i>${esc(s.name)}</span><span>${s.values[i]==null?"—":fmt(s.values[i])}</span></div>`).join("");
+  if(spec.stacked) rows+=`<div class="row" style="border-top:1px solid rgba(255,255,255,.2);margin-top:3px;padding-top:3px"><span>Total</span><span>${fmt(spec.series.reduce((a,s)=>a+z(s.values[i]),0))}</span></div>`;
+  tip.innerHTML=`<b>${esc(spec.cats[i])}</b>${rows}`; tip.hidden=false;
+  const r=tip.getBoundingClientRect(); let x=e.clientX+14,y=e.clientY+14; if(x+r.width>innerWidth-8)x=e.clientX-r.width-14; if(y+r.height>innerHeight-8)y=e.clientY-r.height-14;
+  tip.style.left=x+"px";tip.style.top=y+"px";
+});
+let rsT;addEventListener("resize",()=>{clearTimeout(rsT);rsT=setTimeout(drawCharts,150)});
+
+/* ============ views ============ */
+const V={};
+const QL=q=>"T"+(q+1);
+
+V.tablero=()=>{
+  const e=state.empresa,bp=budget(state,"plan"),br=budget(state,"real"),py=prevYear(),cq=curQ(),all=rockStats(state);
+  const qsReal=[0,1,2,3].filter(q=>br.hasData[q]);
+  const realYTD=qsReal.reduce((a,q)=>a+br.ing[q],0),planYTD=qsReal.reduce((a,q)=>a+bp.ing[q],0);
+  let prevSame=null; if(py){const pb=budget(py,"real");if(qsReal.every(q=>pb.hasData[q])&&qsReal.length) prevSame=qsReal.reduce((a,q)=>a+pb.ing[q],0);}
+  const fq=focusQ(),T=state.trimestres[fq],cs=cnState(T.cn);
+  const d1=ratio(realYTD,planYTD),d2=prevSame?realYTD/prevSame-1:null;
+  let h="";
+  if(state.ejemplo) h+=`<div class="banner"><div><b>Estás viendo datos de ejemplo.</b> Son de una marca de ropa de ciclismo ficticia, para que veas cómo funciona el programa y cómo se comparan los años.</div><button class="btn" data-act="clear-examples" data-safe="1">Borrar ejemplos y empezar mi plan</button></div>`;
+  h+=head(esc(e.nombre||"Tu empresa")+" · "+state.anio, e.resumen?esc(e.resumen):"Escribe el resumen del año en la pestaña Estrategia.");
+  h+=`<div class="tiles">
+   <div class="tile"><div class="k">Ventas reales ${qsReal.length?`(${qsReal.map(QL).join(", ")})`:""}</div><div class="v">${qsReal.length?fQ(realYTD):"—"}</div><div class="s">${qsReal.length?`${fP(d1)} del plan${d2!=null?` · <span class="delta ${d2>=0?"up":"down"}">${d2>=0?"▲ +":"▼ "}${nf1.format(d2*100)} %</span> vs. ${state.anio-1}`:""}`:"Aún sin ventas reales. Captúralas en Presupuesto › Real."}</div></div>
+   <div class="tile"><div class="k">Plan de ventas del año</div><div class="v">${fQ(bp.T.ing)}</div><div class="s">Utilidad operativa plan ${fQ(bp.T.uo)} · margen ${fP(bp.T.mo)}</div></div>
+   <div class="tile"><div class="k">Rocks completados</div><div class="v">${all.d} / ${all.t}</div><div class="bar" style="margin-top:8px"><i style="width:${all.t?Math.round(all.d/all.t*100):0}%"></i></div>${all.risk?`<div class="s" style="margin-top:4px">${all.risk} en riesgo o atrasados</div>`:""}</div>
+   <div class="tile"><div class="k">Número crítico ${QL(fq)}</div><div class="v" style="font-size:24px;margin-top:6px">${T.cn.nombre?esc(T.cn.nombre):'<span class="empty" style="font-size:15px">Sin definir</span>'}</div><div class="s" style="margin-top:4px">${cs?`<span class="pill" data-s="${cs}">${CN_L[cs]}</span> real ${esc(fN(T.cn.real))}`:"Sin resultado todavía"}</div></div>
+  </div><div class="quarters">`;
+  for(let q=0;q<4;q++){
+    const s=rockStats(state,q),t=state.trimestres[q],c=cnState(t.cn);
+    h+=`<div class="qc${q===cq?" now":""}"><div class="qh"><span class="qn">${QL(q)}</span><span class="hint">${QM[q]}${q===cq?" · actual":""}</span></div>
+      <div class="tema">${t.tema?esc(t.tema):'<span class="empty">Sin tema</span>'}</div>
+      <div><div class="kv" style="border:0;padding:0 0 4px"><span>Rocks</span><span>${s.d}/${s.t} hechos</span></div><div class="bar"><i style="width:${s.t?Math.round(s.d/s.t*100):0}%"></i></div></div>
+      <div class="kv"><span>Número crítico</span><span>${c?`<span class="pill" data-s="${c}">${CN_L[c]}</span>`:"—"}</span></div>
+      <div class="kv"><span>Ventas plan</span><span>${fQ(bp.ing[q])}</span></div>
+      <div class="kv"><span>Ventas real</span><span>${br.hasData[q]?fQ(br.ing[q]):"—"}</span></div>
+      <div class="kv"><span>Cumplimiento</span><span>${br.hasData[q]?`<span class="pill" data-s="${pctState(ratio(br.ing[q],bp.ing[q]))}">${fP(ratio(br.ing[q],bp.ing[q]))}</span>`:"—"}</span></div>
+      <div class="kv"><span>Revisión trimestral</span><span><span class="pill" data-s="${state.revisiones[q].hecha?"good":""}">${state.revisiones[q].hecha?"Hecha":"Pendiente"}</span></span></div></div>`;
+  }
+  h+=`</div><div class="grid2"><div class="panel"><div class="h3">Cumplimiento de KPIs</div>${state.kpis.length?`<div class="tscroll"><table class="t"><thead><tr><th>KPI</th>${[0,1,2,3].map(q=>`<th class="r">${QL(q)}</th>`).join("")}<th class="r">Año</th></tr></thead><tbody>${state.kpis.map(k=>`<tr><td class="lbl" style="white-space:normal">${esc(k.nombre||"(sin nombre)")}</td>${[0,1,2,3].map(q=>{const r=kpiPct(k,k.real[q],k.meta[q]);return `<td class="r"><span class="pill" data-s="${pctState(r)}">${fP(r)}</span></td>`}).join("")}<td class="r">${(()=>{const r=kpiPct(k,kpiYear(k,k.real),kpiYear(k,k.meta));return `<span class="pill" data-s="${pctState(r)}">${fP(r)}</span>`})()}</td></tr>`).join("")}</tbody></table></div><p class="hint">Verde: meta cumplida · Ámbar: 90–99 % · Rojo: menos de 90 %. En KPIs donde “menos es mejor” el cumplimiento se calcula al revés.</p>`:'<p class="empty">Agrega KPIs en la pestaña KPIs.</p>'}</div>
+  <div class="panel"><div class="h3">Rocks de ${QL(fq)}</div>${state.trimestres[fq].rocks.length?state.trimestres[fq].rocks.map((r,i)=>`<div class="kv" style="align-items:center"><span style="color:var(--ink)">${i+1}. ${r.t?esc(r.t):'<span class="empty">Sin definir</span>'}${r.dueno?` <span class="muted">· ${esc(r.dueno)}</span>`:""}</span><span><span class="pill" data-s="${r.estado}">${(ROCK_E.find(x=>x[0]===r.estado)||ROCK_E[0])[1]}</span></span></div>`).join(""):'<p class="empty">Sin Rocks para este trimestre.</p>'}<p style="margin:10px 0 0"><button class="linkbtn" data-goto="rocks" data-safe="1">Ir a Rocks →</button></p></div></div>`;
+  return h;
+};
+
+V.unapagina=()=>{
+  const E=state.estrategia,fq=focusQ(),T=state.trimestres[fq],cs=cnState(T.cn);
+  const L=(arr,f)=>{const it=arr.map(f).filter(Boolean);return it.length?`<ul>${it.map(x=>`<li>${x}</li>`).join("")}</ul>`:'<p class="empty">Sin definir</p>'};
+  const edit=t=>`<small><button class="linkbtn" data-goto="${t}" data-safe="1">Editar</button></small>`;
+  return head("Plan en una página","El resumen de Scaling Up (OPSP): de los valores y el propósito, hasta los Rocks y el número crítico del trimestre. Se arma solo con lo que llenas en las otras pestañas.",`<div class="qtabs">${[0,1,2,3].map(q=>`<button class="chip-btn" data-act="qsel" data-q="${q}" data-safe="1" aria-pressed="${q===fq}">${QL(q)}</button>`).join("")}</div>`)+
+  `<div class="opsp">
+   <div class="col"><h3>Valores centrales ${edit("estrategia")}</h3>${L(E.valores,v=>v&&esc(v))}</div>
+   <div class="col"><h3>Propósito ${edit("estrategia")}</h3>${E.proposito?`<p class="big" style="margin:0">${esc(E.proposito)}</p>`:'<p class="empty">Sin definir</p>'}${E.palabras?`<div class="box"><span class="label" style="margin:0">Palabras que queremos poseer</span>${esc(E.palabras)}</div>`:""}</div>
+   <div class="col"><h3>Metas 3–5 años ${edit("estrategia")}</h3>${E.bhag?`<div class="box"><span class="label" style="margin:0">BHAG</span><span class="big">${esc(E.bhag)}</span></div>`:""}${L(E.metas35,m=>m.meta&&(esc(m.meta)+(m.indicador?` <span class="muted">· ${esc(m.indicador)}</span>`:"")))}${E.promesas.some(p=>p.promesa)?`<span class="label" style="margin:4px 0 0">Promesas de marca</span>${L(E.promesas,p=>p.promesa&&esc(p.promesa))}`:""}</div>
+   <div class="col"><h3>Objetivos ${state.anio} ${edit("objetivos")}</h3>${L(state.objetivos,(o,i)=>o.obj&&`<b style="font-family:var(--f-mono);font-weight:500">O${i+1}</b> ${esc(o.obj)}${o.meta?` <span class="muted">· ${esc(o.meta)}</span>`:""}`)}</div>
+   <div class="col"><h3>Rocks ${QL(fq)} ${edit("rocks")}</h3>${L(T.rocks,r=>r.t&&`${esc(r.t)} <span class="pill" data-s="${r.estado}">${(ROCK_E.find(x=>x[0]===r.estado)||ROCK_E[0])[1]}</span>${r.dueno?` <span class="muted">· ${esc(r.dueno)}</span>`:""}`)}</div>
+   <div class="col"><h3>Tema ${QL(fq)} ${edit("rocks")}</h3>${T.tema?`<p class="big" style="margin:0">${esc(T.tema)}</p>`:'<p class="empty">Sin tema</p>'}<div class="box"><span class="label" style="margin:0">Número crítico</span>${T.cn.nombre?esc(T.cn.nombre):'<span class="empty">Sin definir</span>'}<div style="margin-top:4px">${cs?`<span class="pill" data-s="${cs}">${CN_L[cs]}</span>`:""}</div></div>${T.cn.recompensa?`<p class="hint" style="margin:0">Celebración: ${esc(T.cn.recompensa)}</p>`:""}</div>
+  </div>
+  <div class="grid2" style="margin-top:12px">
+   <div class="panel"><div class="h3" style="display:flex;justify-content:space-between">FDT ${edit("fdt")}</div><div class="grid2" style="gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">${[["f","Fortalezas"],["d","Debilidades"],["t","Tendencias"]].map(([k,t])=>`<div><span class="label">${t}</span>${L(state.fdt[k],x=>x&&esc(x))}</div>`).join("")}</div></div>
+   <div class="panel"><div class="h3" style="display:flex;justify-content:space-between">Estrategia ${edit("estrategia")}</div>${E.frase?`<p class="big" style="margin:0 0 8px">${esc(E.frase)}</p>`:""}<div class="kv"><span>Terreno de juego</span><span style="font-family:var(--f-body);font-size:13.5px">${esc(E.terreno)||"—"}</span></div><div class="kv"><span>Factor X</span><span style="font-family:var(--f-body);font-size:13.5px">${esc(E.factorX)||"—"}</span></div><div class="kv"><span>Utilidad por X</span><span style="font-family:var(--f-body);font-size:13.5px">${esc(E.utilidadX)||"—"}</span></div></div>
+  </div>`;
+};
+
+V.estrategia=()=>{
+  const E="estrategia";
+  const list=(key,ph,lbl)=>state.estrategia[key].map((_,i)=>`<div class="li"><span class="dot"></span>${ti(`${E}.${key}.${i}`,ph)}<button class="x" data-act="del" data-list="${E}.${key}" data-i="${i}" aria-label="Quitar">×</button></div>`).join("")+listAdd(lbl,"add-str",`data-list="${E}.${key}"`);
+  return head("Estrategia","La parte que cambia poco de un año a otro. Al crear un año nuevo se copia automáticamente.")+
+  `<div class="stack"><div class="panel"><label class="label" for="${pid("empresa.resumen")}">Resumen del año ${state.anio}</label>${ta("empresa.resumen","En 3–4 líneas: qué hará la marca este año y el resultado esperado.",3)}
+   <div class="grid2" style="margin-top:12px"><div><label class="label" for="${pid("empresa.nombre")}">Empresa</label>${ti("empresa.nombre","Nombre de la marca")}</div><div><label class="label" for="${pid("empresa.giro")}">Giro</label>${ti("empresa.giro","Giro")}</div><div><label class="label" for="${pid("empresa.responsable")}">Responsable del plan</label>${ti("empresa.responsable","Nombre y cargo")}</div><div><label class="label" for="${pid("empresa.colaboradores")}">Colaboradores</label>${ni("empresa.colaboradores","0","Colaboradores")}</div></div></div>
+  <div class="grid2">
+   <div class="panel"><span class="label">Valores centrales</span><p class="hint" style="margin:-2px 0 8px">3 a 5 reglas que guían cómo trabajamos y a quién contratamos.</p>${list("valores","Ej.: Hecho para rodar de verdad","valor")}</div>
+   <div class="panel"><label class="label" for="${pid(E+".proposito")}">Propósito</label><p class="hint" style="margin:-2px 0 8px">Por qué existimos, más allá de vender ropa.</p>${ta(E+".proposito","Ej.: Que más gente disfrute del ciclismo con ropa que rinde como la de los profesionales.",3)}
+    <label class="label" for="${pid(E+".cliente")}" style="margin-top:12px">Cliente objetivo</label>${ta(E+".cliente","Ej.: ciclistas de ruta y MTB de 25 a 50 años; clubes y equipos que buscan uniforme propio.",2)}</div>
+  </div>
+  <div class="grid2">
+   <div class="panel"><label class="label" for="${pid(E+".bhag")}">BHAG · meta grande y audaz (10–25 años)</label>${ta(E+".bhag","Ej.: Vestir a 100,000 ciclistas en Centroamérica.",2)}</div>
+   <div class="panel"><span class="label">Metas a 3–5 años</span>${state.estrategia.metas35.map((m,i)=>`<div class="li lab">${fl("Meta",ti(`${E}.metas35.${i}.meta`,"Ej.: Ventas de Q 5 M","",`Meta ${i+1}`))}${fl("Indicador",ti(`${E}.metas35.${i}.indicador`,"Ej.: Ventas anuales","","Indicador"))}<button class="x" data-act="del" data-list="${E}.metas35" data-i="${i}" aria-label="Quitar">×</button></div>`).join("")}${listAdd("meta","add-meta35")}</div>
+  </div>
+  ${subhead("Las 7 capas de la estrategia","Lo que hace a la marca difícil de copiar. No hace falta llenarlo todo el primer año.")}
+  <div class="grid2">
+   <div class="panel"><label class="label" for="${pid(E+".palabras")}">1 · Palabras que queremos poseer</label>${ti(E+".palabras","Ej.: “uniforme de club en 3 semanas”")}</div>
+   <div class="panel"><label class="label" for="${pid(E+".terreno")}">2 · Terreno de juego</label>${ta(E+".terreno","Dónde jugamos: qué clientes, qué productos y en qué zona.",2)}</div>
+   <div class="panel"><span class="label">3 · Promesas de marca y su KPI</span>${state.estrategia.promesas.map((p,i)=>`<div class="li lab">${fl("Promesa",ti(`${E}.promesas.${i}.promesa`,"Ej.: Tallas que sí quedan","","Promesa"))}${fl("KPI que la mide",ti(`${E}.promesas.${i}.kpi`,"Ej.: % de cambios por talla","","KPI"))}<button class="x" data-act="del" data-list="${E}.promesas" data-i="${i}" aria-label="Quitar">×</button></div>`).join("")}${listAdd("promesa","add-promesa")}</div>
+   <div class="panel"><label class="label" for="${pid(E+".garantia")}">4 · Garantía de la promesa</label>${ti(E+".garantia","Ej.: Si no te queda, la cambiamos sin costo")}</div>
+   <div class="panel"><label class="label" for="${pid(E+".frase")}">5 · Estrategia en una frase</label>${ti(E+".frase","Ej.: Ropa técnica hecha aquí, a la medida del club")}</div>
+   <div class="panel"><span class="label">6 · Actividades que nos diferencian</span>${list("actividades","Ej.: Producción propia en lotes cortos","actividad")}</div>
+   <div class="panel"><label class="label" for="${pid(E+".factorX")}">7 · Factor X</label>${ti(E+".factorX","La ventaja 10 veces mejor que la competencia")}
+    <label class="label" for="${pid(E+".utilidadX")}" style="margin-top:12px">Utilidad por X</label>${ti(E+".utilidadX","Ej.: utilidad por prenda producida")}</div>
+  </div></div>`;
+};
+
+V.fdt=()=>{const Q=[["f","Fortalezas","Internas · lo que hacemos mejor que otros"],["d","Debilidades","Internas · lo que nos frena"],["t","Tendencias","Externas · cambios del mercado, el deporte y la tecnología que nos afectan"]];
+  return head("FDT: Fortalezas, debilidades y tendencias","Scaling Up cambia el FODA clásico: en lugar de oportunidades y amenazas, identifica las tendencias que van a mover tu mercado.")+
+  `<div class="fdt">${Q.map(([k,t,s])=>`<div class="q ${k}"><h3>${t}</h3><div class="kind">${s}</div>${state.fdt[k].map((_,i)=>`<div class="li"><span class="dot"></span>${ti(`fdt.${k}.${i}`,k==="t"?"Ej.: crecimiento del gravel":"Escribe un punto")}<button class="x" data-act="del" data-list="fdt.${k}" data-i="${i}" aria-label="Quitar">×</button></div>`).join("")}${listAdd("punto","add-str",`data-list="fdt.${k}"`)}</div>`).join("")}</div>`;};
+
+V.objetivos=()=>head(`Objetivos ${state.anio}`,"De 3 a 5 objetivos medibles para el año. Cada Rock trimestral se puede ligar a uno (O1, O2…).",`<button class="btn primary add" data-act="add-obj">+ Agregar objetivo</button>`)+
+ `<div class="panel"><div class="tscroll"><table class="t" style="min-width:720px"><thead><tr><th style="width:44px">#</th><th>Objetivo</th><th>Indicador</th><th style="width:130px">Meta anual</th><th style="width:170px">Responsable</th><th style="width:36px"></th></tr></thead><tbody>
+ ${state.objetivos.map((o,i)=>`<tr><td class="lbl" style="font-family:var(--f-mono);font-weight:500">O${i+1}</td><td>${ti(`objetivos.${i}.obj`,"Ej.: Crecer ventas de uniformes de club","bare")}</td><td>${ti(`objetivos.${i}.indicador`,"Ej.: Ventas del canal (Q)","bare")}</td><td>${ti(`objetivos.${i}.meta`,"Ej.: +30 %","bare")}</td><td>${ti(`objetivos.${i}.resp`,"Nombre","bare")}</td><td><button class="x" data-act="del" data-list="objetivos" data-i="${i}" aria-label="Quitar objetivo">×</button></td></tr>`).join("")}
+ </tbody></table></div>${state.objetivos.length?"":'<p class="empty">Aún no hay objetivos.</p>'}</div>`;
+
+V.rocks=()=>{
+  const q=focusQ(),T=state.trimestres[q],p=`trimestres.${q}`,cq=curQ(),objOpts=[["","Sin objetivo"]].concat(state.objetivos.map((o,i)=>[o.id,"O"+(i+1)+(o.obj?" · "+o.obj.slice(0,28):"")]));
+  let h=head("Rocks y número crítico","Cada trimestre: un tema, un número crítico y de 3 a 5 Rocks (prioridades de empresa), cada uno con un solo dueño. Actualiza el semáforo cada semana.",
+   `<div class="qtabs">${[0,1,2,3].map(i=>`<button class="chip-btn" data-act="qsel" data-q="${i}" data-safe="1" aria-pressed="${i===q}">${QL(i)} <span class="muted" style="font-size:12px">${QM[i]}${i===cq?" · actual":""}</span></button>`).join("")}</div>`);
+  h+=`<div class="qgrid"><div class="stack">
+   <div class="panel"><label class="label" for="${pid(p+".tema")}">Tema de ${QL(q)}</label>${ti(p+".tema","Ej.: Temporada de clubes")}</div>
+   <div class="panel"><label class="label" for="${pid(p+".cn.nombre")}">Número crítico</label>${ti(p+".cn.nombre","Ej.: Uniformes de club entregados a tiempo (%)")}
+    <div style="display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap"><span class="hint">Mejor si es</span>${sel(p+".cn.mayor",[["true","Más alto"],["false","Más bajo"]],"w-auto","Dirección")}</div>
+    <div class="cn-scale"><div class="r">Rojo<div class="hint" style="color:inherit;font-weight:400;margin-top:4px">debajo de amarillo</div></div><div class="a">Amarillo${ni(p+".cn.amarillo","","Umbral amarillo")}</div><div class="v">Verde${ni(p+".cn.verde","","Umbral verde")}</div><div class="s">Súper verde${ni(p+".cn.super","","Umbral súper verde")}</div></div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px"><div><label class="label" for="${pid(p+".cn.real")}">Resultado real</label>${ni(p+".cn.real","","Resultado real")}</div><span class="pill" data-calc="cn${q}" style="margin-bottom:8px">—</span></div>
+    <label class="label" for="${pid(p+".cn.recompensa")}" style="margin-top:10px">Celebración si llegamos a verde</label>${ti(p+".cn.recompensa","Ej.: Rodada y almuerzo del equipo")}</div>
+  </div><div class="stack">
+   ${T.rocks.length>5?`<div class="warnbox">Tienes ${T.rocks.length} Rocks. Scaling Up recomienda no más de 5 por trimestre para mantener el foco.</div>`:""}
+   ${T.rocks.map((r,i)=>{const rp=`${p}.rocks.${i}`;return `<div class="rock" data-s="${r.estado||"sin"}"><span class="n">${i+1}</span>${fl("Rock · qué debe estar logrado al cierre",ti(rp+".t","Ej.: Segundo turno de producción funcionando","","Rock "+(i+1)))}<div class="fl"><span>Estado</span><div style="display:flex;gap:8px;align-items:center"><span class="light" aria-hidden="true"></span><select id="${pid(rp+".estado")}" class="estado" data-bind="${rp}.estado" data-s="${r.estado||"sin"}" aria-label="Estado">${ROCK_E.map(([k,l])=>`<option value="${k}"${r.estado===k?" selected":""}>${l}</option>`).join("")}</select><button class="x" data-act="del" data-list="${p}.rocks" data-i="${i}" aria-label="Quitar Rock">×</button></div></div>
+     <div class="meta">${fl("Dueño",ti(rp+".dueno","Una sola persona","","Dueño"))}${fl("Cómo sabremos que está terminado",ti(rp+".fin","Ej.: capacidad +30 % medida en octubre","","Definición de terminado"),"wide")}${fl("Objetivo al que aporta",sel(rp+".o",objOpts,"","Objetivo"))}${fl("Área",sel(rp+".area",[["","Sin área"]].concat(state.personas.face.map(f=>[f.funcion,f.funcion])),"","Área"),"wide")}</div></div>`}).join("")}
+   ${T.rocks.length?"":'<div class="panel"><p class="empty" style="margin:0">Sin Rocks para este trimestre.</p></div>'}
+   <div>${listAdd("Agregar Rock","add-rock",`data-q="${q}"`)}</div>
+  </div></div>`;
+  return h;
+};
+
+V.colecciones=()=>{
+  const C=state.colecciones;
+  let h=head("Calendario de colecciones","Lo que se vende en un trimestre se diseñó y produjo antes. Asigna a cada etapa el trimestre en que debe ocurrir y marca su avance.",`<button class="btn primary add" data-act="add-col">+ Agregar colección</button>`);
+  if(C.length){
+    h+=`<div class="tscroll" style="margin-bottom:18px"><div class="gantt"><div class="gh">Colección</div>${[0,1,2,3].map(q=>`<div class="gh">${QL(q)} · ${QM[q]}</div>`).join("")}`;
+    C.forEach(c=>{h+=`<div class="gn">${esc(c.nombre||"(sin nombre)")}<span class="hint" style="font-weight:400">${esc(c.linea||"")}${c.unidades?` · ${nf.format(c.unidades)} u.`:""}</span></div>`+[0,1,2,3].map(q=>`<div>${c.etapas.map((e,i)=>e.q===QL(q)?`<span class="stg" data-e="${e.e}">${ETAPAS[i]}</span>`:"").join("")}</div>`).join("")});
+    h+=`</div></div>`;
+  }
+  h+=`<div class="panel"><div class="tscroll"><table class="t" style="min-width:980px"><thead><tr><th>Colección</th><th>Línea</th><th class="r" style="width:90px">Unidades</th>${ETAPAS.map(e=>`<th>${e}</th>`).join("")}<th></th></tr></thead><tbody>
+  ${C.map((c,i)=>`<tr><td>${ti(`colecciones.${i}.nombre`,"Ej.: Verano 2027","bare")}</td><td>${ti(`colecciones.${i}.linea`,"Ej.: Ruta","bare")}</td><td>${ni(`colecciones.${i}.unidades`,"0","Unidades")}</td>${c.etapas.map((e,j)=>`<td><div class="stgcell"><button class="stbtn" data-e="${e.e}" data-act="cycle-stage" data-c="${i}" data-j="${j}" title="${EST3[e.e]}" aria-label="${ETAPAS[j]}: ${EST3[e.e]}"></button>${sel(`colecciones.${i}.etapas.${j}.q`,[["","—"],"T1","T2","T3","T4"],"w-auto",ETAPAS[j]+" trimestre")}</div></td>`).join("")}<td><button class="x" data-act="del" data-list="colecciones" data-i="${i}" aria-label="Quitar colección">×</button></td></tr>`).join("")}
+  </tbody></table></div>${C.length?`<p class="hint">Toca el círculo para cambiar el estado: vacío = pendiente, medio = en curso, lleno = hecho.</p>`:'<p class="empty">Aún no hay colecciones.</p>'}</div>`;
+  return h;
+};
+
+V.kpis=()=>head("KPIs por trimestre","Meta al inicio del año y resultado real al cerrar cada trimestre. Las ventas se capturan en Presupuesto; aquí van los indicadores de operación y marca.",`<button class="btn primary add" data-act="add-kpi">+ Agregar KPI</button>`)+
+ `<div class="stack">${state.kpis.map((k,i)=>`<div class="kpi"><div class="kpi-top" style="align-items:flex-end">${fl("Nombre del KPI",ti(`kpis.${i}.nombre`,"Ej.: Costo unitario por prenda","","Nombre"),"name")}${fl("Unidad",sel(`kpis.${i}.unidad`,[["Q","Quetzales"],["%","Porcentaje"],["#","Cantidad"]],"w-auto","Unidad"))}${fl("Total del año",sel(`kpis.${i}.tipo`,[["Suma","Suma"],["Promedio","Promedio"],["Último","Último trimestre"]],"w-auto","Total del año"))}${fl("Dirección",sel(`kpis.${i}.menor`,[["false","Mejor si sube"],["true","Mejor si baja"]],"w-auto","Dirección"))}<button class="x" data-act="del" data-list="kpis" data-i="${i}" aria-label="Quitar KPI">×</button></div>
+ <div class="tscroll"><table class="t"><thead><tr><th></th>${[0,1,2,3].map(q=>`<th class="r">${QL(q)}</th>`).join("")}<th class="r tot">Año</th></tr></thead><tbody>
+ <tr><td class="lbl">Meta</td>${[0,1,2,3].map(q=>`<td>${ni(`kpis.${i}.meta.${q}`,"","Meta "+QL(q))}</td>`).join("")}<td class="r tot">${calc(`k${i}.my`)}</td></tr>
+ <tr><td class="lbl">Real</td>${[0,1,2,3].map(q=>`<td>${ni(`kpis.${i}.real.${q}`,"","Real "+QL(q))}</td>`).join("")}<td class="r tot">${calc(`k${i}.ry`)}</td></tr>
+ <tr class="sub"><td class="lbl">Cumplimiento</td>${[0,1,2,3].map(q=>`<td class="r"><span class="pill" data-calc="k${i}.p${q}">—</span></td>`).join("")}<td class="r tot"><span class="pill" data-calc="k${i}.py">—</span></td></tr>
+ </tbody></table></div></div>`).join("")}</div>`+
+ subhead("Capacidad de producción","Prendas que el taller puede producir contra las que exige el plan de ventas. Arriba de 90 % conviene planear turnos extra o maquila.")+
+ `<div class="panel"><div class="tscroll"><table class="t" style="min-width:560px"><thead><tr><th>Unidades</th>${[0,1,2,3].map(q=>`<th class="r">${QL(q)}</th>`).join("")}<th class="r tot">Año</th></tr></thead><tbody>
+ <tr><td class="lbl">Capacidad</td>${[0,1,2,3].map(q=>`<td>${ni(`capacidad.cap.${q}`,"0","Capacidad "+QL(q))}</td>`).join("")}<td class="r tot">${calc("cap.capT")}</td></tr>
+ <tr><td class="lbl">Demanda planeada</td>${[0,1,2,3].map(q=>`<td>${ni(`capacidad.dem.${q}`,"0","Demanda "+QL(q))}</td>`).join("")}<td class="r tot">${calc("cap.demT")}</td></tr>
+ <tr class="sub"><td class="lbl">Uso de capacidad</td>${[0,1,2,3].map(q=>`<td class="r"><span class="pill" data-calc="cap.u${q}">—</span></td>`).join("")}<td class="r tot"><span class="pill" data-calc="cap.uT">—</span></td></tr>
+ </tbody></table></div></div>`;
+
+V.presupuesto=()=>{
+  const P=state.presupuesto,key=pmode==="real"?"r":"v",px=pmode==="real"?"r":"p";
+  const hdr=`<thead><tr><th>Concepto (Q)</th>${[0,1,2,3].map(q=>`<th class="r">${QL(q)}</th>`).join("")}<th class="r tot">Total año</th></tr></thead>`;
+  const rows=(g,ph)=>P[g].map((row,i)=>`<tr><td style="min-width:230px"><div style="display:flex;gap:2px;align-items:center">${ti(`presupuesto.${g}.${i}.nombre`,ph,"bare","Concepto")}<button class="x" data-act="del" data-list="presupuesto.${g}" data-i="${i}" aria-label="Quitar">×</button></div></td>${[0,1,2,3].map(q=>`<td>${ni(`presupuesto.${g}.${i}.${key}.${q}`,"0",row.nombre+" "+QL(q))}</td>`).join("")}<td class="r tot">${calc(`${px}.${g}${i}.T`)}</td></tr>`).join("");
+  const cRow=(lbl,k,cls)=>`<tr class="${cls||""}"><td class="lbl">${lbl}</td>${[0,1,2,3].map(q=>`<td class="r">${calc(`${px}.${k}.${q}`)}</td>`).join("")}<td class="r tot">${calc(`${px}.${k}.T`)}</td></tr>`;
+  const grp=(t,act)=>`<tr class="grp"><td colspan="6"><span class="label" style="margin:0 0 0 4px;display:inline">${t}</span></td></tr>`;
+  let h=head("Presupuesto y resultados",`Captura el <b>plan</b> al inicio del año y el <b>real</b> al cierre de cada trimestre. Montos en quetzales.`,
+   `<div class="qtabs" role="group" aria-label="Plan o real"><button class="chip-btn" data-act="pmode" data-m="plan" data-safe="1" aria-pressed="${pmode==="plan"}">Plan</button><button class="chip-btn" data-act="pmode" data-m="real" data-safe="1" aria-pressed="${pmode==="real"}">Real</button></div>`);
+  h+=`<div class="panel"><div class="tscroll"><table class="t" style="min-width:800px">${hdr}<tbody>`;
+  h+=grp("Ventas por canal")+rows("canales","Canal de venta")+`<tr><td colspan="6">${listAdd("canal","add-row",`data-g="canales"`)}</td></tr>`+cRow("<b>Ventas totales</b>","ing","sum");
+  h+=grp("Costo de producción")+rows("costos","Concepto de costo")+`<tr><td colspan="6">${listAdd("costo","add-row",`data-g="costos"`)}</td></tr>`+cRow("Costo de ventas","cos","sum");
+  h+=cRow("Utilidad bruta","ub","sum")+cRow("Margen bruto","mb","sub");
+  h+=grp("Gastos operativos")+rows("gastos","Concepto de gasto")+`<tr><td colspan="6">${listAdd("gasto","add-row",`data-g="gastos"`)}</td></tr>`;
+  h+=cRow("Total gastos operativos","gt","sum")+cRow("Utilidad operativa","uo","sum")+cRow("Margen operativo","mo","sub");
+  h+=`<tr class="grp"><td class="lbl">Inversiones (maquinaria, equipo)</td>${[0,1,2,3].map(q=>`<td>${ni(`presupuesto.inversiones.${key}.${q}`,"0","Inversiones "+QL(q))}</td>`).join("")}<td class="r tot">${calc(`${px}.invrow.T`)}</td></tr>`;
+  h+=cRow("Flujo del trimestre","fl","sum")+cRow("Flujo acumulado","ac","sub");
+  h+=`</tbody></table></div></div>`;
+  return h;
+};
+
+V.efectivo=()=>{
+  const e="efectivo";
+  return head("Efectivo: el Poder del Uno","Cuánto mejora tu utilidad y tu efectivo si mueves un poco cada palanca. Cifras anuales, antes de impuestos.")+
+  `<div class="grid2"><div class="panel"><div class="h3">Base del cálculo</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px"><span class="hint">Usar cifras de</span>${sel(e+".base",[["plan","Presupuesto (plan)"],["real","Resultados reales"]],"w-auto","Base")}</div>
+    <div class="kv"><span>Ventas del año</span><span>${calc("po.V")}</span></div><div class="kv"><span>Costo de ventas</span><span>${calc("po.C")}</span></div><div class="kv"><span>Gastos operativos</span><span>${calc("po.G")}</span></div><div class="kv"><span>Utilidad operativa</span><span>${calc("po.uo")}</span></div></div>
+   <div class="panel"><div class="h3">Ciclo de conversión de efectivo</div>
+    <div class="grid2" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><div><label class="label" for="${pid(e+".di")}">Días de inventario</label>${ni(e+".di","0","Días de inventario")}</div><div><label class="label" for="${pid(e+".dc")}">Días de cobro</label>${ni(e+".dc","0","Días de cobro")}</div><div><label class="label" for="${pid(e+".dp")}">Días de pago</label>${ni(e+".dp","0","Días de pago")}</div></div>
+    <p class="hint" style="margin:6px 0 8px">Inventario incluye tela y producto terminado. Cobro: lo que tardan tiendas y clubes en pagar. Pago: lo que tardas en pagar a proveedores.</p>
+    <div class="kv"><span><b style="color:var(--ink)">Ciclo (inventario + cobro − pago)</b></span><span>${calc("po.ccc")}</span></div>
+    <div class="kv"><span>Dinero en inventario</span><span>${calc("po.inv")}</span></div><div class="kv"><span>Dinero en cuentas por cobrar</span><span>${calc("po.cxc")}</span></div><div class="kv"><span>Financiado por proveedores</span><span>${calc("po.cxp")}</span></div><div class="kv"><span><b style="color:var(--ink)">Efectivo atrapado en la operación</b></span><span>${calc("po.neto")}</span></div></div></div>
+  <div class="panel" style="margin-top:16px"><div class="h3">Las 7 palancas</div><div class="tscroll"><table class="t" style="min-width:720px"><thead><tr><th>Palanca</th><th class="r" style="width:120px">Mejora</th><th class="r">Impacto en utilidad</th><th class="r">Impacto en efectivo</th><th style="width:26%"></th></tr></thead><tbody>
+   ${[["precio","Subir precio","%"],["volumen","Vender más unidades","%"],["costo","Bajar costo de producción","%"],["gastos","Bajar gastos operativos","%"],["dc","Cobrar más rápido","días"],["di","Menos días de inventario","días"],["dp","Más plazo con proveedores","días"]].map(([k,n,u])=>`<tr><td class="lbl">${n}</td><td><div style="display:flex;gap:4px;align-items:center">${ni(`${e}.pal.${k}`,"1",n)}<span class="hint" style="width:32px">${u}</span></div></td><td class="r">${calc(`po.${k}.u`)}</td><td class="r">${calc(`po.${k}.c`)}</td><td><div class="bar" style="height:10px"><i id="pob-${k}" style="width:0;background:var(--s1)"></i></div></td></tr>`).join("")}
+   <tr class="sum"><td class="lbl">Total si mueves todas</td><td></td><td class="r">${calc("po.tu")}</td><td class="r">${calc("po.tc")}</td><td></td></tr>
+   <tr class="sub"><td class="lbl">Utilidad operativa resultante</td><td></td><td class="r">${calc("po.nuo")}</td><td></td><td></td></tr>
+  </tbody></table></div><p class="hint">Idea para una marca que fabrica: cobrar 50 % de anticipo en uniformes de club y negociar más días con los proveedores de tela acorta el ciclo sin vender una prenda más.</p></div>`;
+};
+
+V.personas=()=>head("Personas y responsabilidades","Quién es dueño de cada resultado. Una persona puede tener varias funciones; lo importante es que ninguna función quede sin dueño.")+
+ subhead("Funciones (FACe)","Cada función con su responsable y los números que debe mover.",`<button class="btn small add" data-act="add-face">+ Función</button>`)+
+ `<div class="panel"><div class="tscroll"><table class="t" style="min-width:680px"><thead><tr><th>Función</th><th style="width:200px">Responsable</th><th>KPIs / resultados</th><th style="width:36px"></th></tr></thead><tbody>${state.personas.face.map((f,i)=>`<tr><td>${ti(`personas.face.${i}.funcion`,"Función","bare")}</td><td>${ti(`personas.face.${i}.resp`,"Nombre","bare")}</td><td>${ti(`personas.face.${i}.kpis`,"Ej.: costo unitario, % defectos","bare")}</td><td><button class="x" data-act="del" data-list="personas.face" data-i="${i}" aria-label="Quitar">×</button></td></tr>`).join("")}</tbody></table></div></div>`+
+ subhead("Procesos clave (PACe)","Los procesos que más afectan al cliente, con su dueño y cómo se miden.",`<button class="btn small add" data-act="add-pace">+ Proceso</button>`)+
+ `<div class="stack">${state.personas.pace.map((p,i)=>`<div class="panel"><div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:8px">${fl("Proceso",ti(`personas.pace.${i}.proceso`,"Nombre del proceso","","Proceso"),"name")}<button class="x" data-act="del" data-list="personas.pace" data-i="${i}" aria-label="Quitar">×</button></div><div class="grid2" style="gap:10px"><div><label class="label" for="${pid(`personas.pace.${i}.dueno`)}">Dueño</label>${ti(`personas.pace.${i}.dueno`,"Nombre")}</div><div><label class="label" for="${pid(`personas.pace.${i}.kpi`)}">KPI del proceso</label>${ti(`personas.pace.${i}.kpi`,"Ej.: días del pedido a la entrega")}</div></div><label class="label" for="${pid(`personas.pace.${i}.pasos`)}" style="margin-top:10px">Pasos principales</label>${ta(`personas.pace.${i}.pasos`,"Ej.: cotización → anticipo → diseño aprobado → producción → control de calidad → entrega",2)}</div>`).join("")}</div>`;
+
+V.riesgos=()=>head("Riesgos","Qué podría impedir el plan y cómo lo vas a prevenir.",`<button class="btn primary add" data-act="add-riesgo">+ Agregar riesgo</button>`)+
+ `<div class="panel"><div class="tscroll"><table class="t" style="min-width:820px"><thead><tr><th>Riesgo</th><th style="width:130px">Trimestre</th><th style="width:110px">Impacto</th><th>Plan de mitigación</th><th style="width:150px">Responsable</th><th style="width:36px"></th></tr></thead><tbody>
+ ${state.riesgos.map((r,i)=>`<tr><td>${ti(`riesgos.${i}.riesgo`,"Ej.: retraso en tela importada","bare")}</td><td>${sel(`riesgos.${i}.trim`,["T1","T2","T3","T4","Todo el año"],"","Trimestre")}</td><td>${sel(`riesgos.${i}.impacto`,["Alto","Medio","Bajo"],"","Impacto")}</td><td>${ti(`riesgos.${i}.mitigacion`,"Qué haremos para prevenirlo","bare")}</td><td>${ti(`riesgos.${i}.resp`,"Nombre","bare")}</td><td><button class="x" data-act="del" data-list="riesgos" data-i="${i}" aria-label="Quitar riesgo">×</button></td></tr>`).join("")}
+ </tbody></table></div>${state.riesgos.length?"":'<p class="empty">Aún no hay riesgos registrados.</p>'}</div>`+
+ subhead("Ritmo de reuniones","El ritmo es lo que convierte el plan en ejecución: reuniones cortas y frecuentes con una agenda fija.",`<button class="btn small add" data-act="add-ritmo">+ Reunión</button>`)+
+ `<div class="panel"><div class="tscroll"><table class="t" style="min-width:820px"><thead><tr><th style="width:180px">Reunión</th><th style="width:200px">Cuándo y duración</th><th style="width:170px">Quiénes</th><th>Agenda</th><th style="width:36px"></th></tr></thead><tbody>${state.ritmo.map((r,i)=>`<tr><td>${ti(`ritmo.${i}.reunion`,"Reunión","bare")}</td><td>${ti(`ritmo.${i}.cuando`,"Día, hora, duración","bare")}</td><td>${ti(`ritmo.${i}.quien`,"Participantes","bare")}</td><td>${ti(`ritmo.${i}.agenda`,"Temas fijos","bare")}</td><td><button class="x" data-act="del" data-list="ritmo" data-i="${i}" aria-label="Quitar">×</button></td></tr>`).join("")}</tbody></table></div></div>`+
+ subhead("Revisiones trimestrales","Al cierre de cada trimestre: compara metas con resultados, califica los Rocks y define los del siguiente trimestre.")+
+ `<div class="grid2">${state.revisiones.map((r,i)=>`<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"><b>Revisión ${QL(i)}</b>${chk(`revisiones.${i}.hecha`,"Hecha")}</div><label class="label" for="${pid(`revisiones.${i}.fecha`)}">Fecha</label>${ti(`revisiones.${i}.fecha`,"Fecha de la reunión")}<label class="label" style="margin-top:10px" for="${pid(`revisiones.${i}.notas`)}">Acuerdos y ajustes</label>${ta(`revisiones.${i}.notas`,"Qué se decidió",2)}</div>`).join("")}</div>`;
+
+V.graficas=()=>{
+  const ys=sortedYears(),bp=budget(state,"plan"),br=budget(state,"real"),Q=["T1","T2","T3","T4"];
+  const realOr=(b)=>b.ing.map((v,q)=>b.hasData[q]?v:null);
+  const last3=ys.filter(y=>y<=+state.anio).slice(-3).reverse(); // current first
+  const colors=["var(--s1)","var(--s2)","var(--s3)"];
+  const yd=y=>yearData(yid(y));
+  let h=head("Gráficas",`Los números más importantes de ${state.anio} y su comparación con años anteriores. Pasa el cursor por encima para ver los valores.`);
+  h+=`<div class="charts">`;
+  h+=chartCard("c-ventas",`Ventas por trimestre · ${state.anio}`,"Plan contra real",{type:"bar",cats:Q,series:[{name:"Plan",color:"var(--splan)",values:bp.ing},{name:"Real",color:"var(--s1)",values:realOr(br)}],aria:"Ventas plan contra real por trimestre"});
+  h+=chartCard("c-hist-q","Ventas reales por trimestre, año contra año",last3.length>1?"Cada línea es un año":"Se llena cuando tengas más de un año",{type:"line",cats:Q,series:last3.map((y,i)=>({name:String(y),color:colors[i],values:realOr(budget(yd(y),"real"))})),aria:"Ventas reales por trimestre por año"});
+  const allY=ys.filter(y=>y<=+state.anio).slice(-6);
+  const partial=y=>{const b=budget(yd(y),"real"),n=b.hasData.filter(Boolean).length;return n>0&&n<4?` (${b.hasData.map((h,i)=>h?QL(i):null).filter(Boolean).join("–").replace(/–.*–/,"–")})`:""};
+  h+=chartCard("c-hist-y","Ventas anuales","Plan contra real de cada año. Un año en curso solo suma los trimestres que ya tienen datos reales.",{type:"bar",cats:allY.map(y=>y+partial(y)),series:[{name:"Plan",color:"var(--splan)",values:allY.map(y=>budget(yd(y),"plan").T.ing||null)},{name:"Real",color:"var(--s1)",values:allY.map(y=>{const b=budget(yd(y),"real");return b.hasData.some(Boolean)?b.T.ing:null})}],aria:"Ventas anuales por año"});
+  {const P=state.presupuesto,useReal=br.hasData.some(Boolean),key=useReal?"r":"v";let ch=P.canales.map(c=>({name:c.nombre||"Canal",values:c[key].map(v=>has(v)?+v:0)}));if(ch.length>4){const rest=ch.slice(3);ch=ch.slice(0,3).concat([{name:"Otros",values:[0,1,2,3].map(q=>rest.reduce((a,c)=>a+c.values[q],0))}]);}
+   h+=chartCard("c-canal",`Ventas por canal · ${state.anio}`,useReal?"Resultados reales":"Según el plan (aún sin datos reales)",{type:"bar",stacked:true,cats:Q,series:ch.map((c,i)=>({name:c.name,color:`var(--s${i+1})`,values:c.values})),aria:"Ventas por canal por trimestre"});}
+  h+=chartCard("c-margen","Margen bruto real por trimestre","Comparado con años anteriores",{type:"line",cats:Q,fmt:fP1,afmt:v=>nf.format(v*100)+" %",series:last3.map((y,i)=>{const b=budget(yd(y),"real");return {name:String(y),color:colors[i],values:b.mb.map((v,q)=>b.hasData[q]?v:null)}}),fitMin:true,aria:"Margen bruto por trimestre por año"});
+  h+=chartCard("c-uo",`Utilidad operativa · ${state.anio}`,"Plan contra real",{type:"bar",cats:Q,series:[{name:"Plan",color:"var(--splan)",values:bp.uo.map((v,q)=>bp.hasData[q]?v:null)},{name:"Real",color:"var(--s1)",values:br.uo.map((v,q)=>br.hasData[q]?v:null)}],aria:"Utilidad operativa plan contra real"});
+  h+=chartCard("c-rocks",`Rocks completados · ${state.anio}`,"Porcentaje de Rocks hechos en cada trimestre",{type:"bar",cats:Q,fmt:fP,afmt:v=>nf.format(v*100)+" %",minMax:1,series:[{name:"Rocks hechos",color:"var(--s3)",values:[0,1,2,3].map(q=>{const s=rockStats(state,q);return s.t?s.d/s.t:null})}],empty:"Agrega Rocks para ver su avance.",aria:"Porcentaje de Rocks completados"});
+  h+=chartCard("c-cap",`Capacidad contra demanda · ${state.anio}`,"Prendas por trimestre",{type:"bar",cats:Q,fmt:v=>nf.format(v)+" u.",afmt:v=>nf.format(v),series:[{name:"Capacidad",color:"var(--splan)",values:state.capacidad.cap.map(v=>has(v)?+v:null)},{name:"Demanda",color:"var(--s2)",values:state.capacidad.dem.map(v=>has(v)?+v:null)}],empty:"Llena la capacidad en la pestaña KPIs y capacidad.",aria:"Capacidad contra demanda"});
+  h+=`</div>`;
+  if(ys.length>1){
+    h+=subhead("Comparación entre años","Resultados reales de cada año.");
+    h+=`<div class="panel"><div class="tscroll"><table class="t" style="min-width:640px"><thead><tr><th>Indicador</th>${ys.map(y=>`<th class="r">${y}</th>`).join("")}</tr></thead><tbody>`;
+    const R=(lbl,f)=>`<tr><td class="lbl">${lbl}</td>${ys.map(y=>`<td class="r" style="font-family:var(--f-mono)">${f(yd(y))}</td>`).join("")}</tr>`;
+    const rb=d=>budget(d,"real");
+    h+=R("Ventas reales",d=>{const b=rb(d);return b.hasData.some(Boolean)?fQ(b.T.ing):"—"});
+    h+=R("Ventas plan",d=>fQ(budget(d,"plan").T.ing));
+    h+=R("Margen bruto real",d=>{const b=rb(d);return b.hasData.some(Boolean)?fP1(b.T.mb):"—"});
+    h+=R("Utilidad operativa real",d=>{const b=rb(d);return b.hasData.some(Boolean)?fQ(b.T.uo):"—"});
+    h+=R("Rocks completados",d=>{const s=rockStats(d);return s.t?`${s.d}/${s.t}`:"—"});
+    h+=R("Trimestres con número crítico en verde",d=>{const n=d.trimestres.filter(t=>{const s=cnState(t.cn);return s==="verde"||s==="super"}).length;return `${n}/4`});
+    h+=`</tbody></table></div></div>`;
+  }
+  return h;
+};
+
+/* ============ years modal ============ */
+function yearsModal(){
+  const ys=sortedYears(),next=(ys.length?Math.max(...ys):THIS_YEAR-1)+1;
+  return `<div class="overlay" data-act="close-years" data-safe="1"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="ym-t">
+   <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><h2 id="ym-t">Años del plan</h2><p class="hint" style="margin:0 0 8px">Cada año guarda su propio plan y resultados. Los años anteriores quedan como historial para comparar.</p></div><button class="x" data-act="close-years" data-safe="1" aria-label="Cerrar">×</button></div>
+   ${ys.map(y=>{const d=yearData(yid(y));return `<div class="yrow"><span class="y">${y}</span>${d.ejemplo?'<span class="tag ej">Ejemplo</span>':""}${d.cerrado?'<span class="tag">Cerrado</span>':""}${y===THIS_YEAR?'<span class="tag" style="background:var(--accent-soft);color:var(--accent)">Año en curso</span>':""}<span class="sp"></span>
+     ${yid(y)===cur?'<span class="hint">Abierto</span>':`<button class="btn small" data-act="open-year" data-y="${y}" data-safe="1">Abrir</button>`}
+     <button class="btn small ghost" data-act="toggle-close" data-y="${y}" data-safe="1">${d.cerrado?"Reabrir":"Cerrar año"}</button>
+     <button class="btn small ghost" data-act="del-year" data-y="${y}" data-safe="1" data-armed="0">Eliminar</button></div>`}).join("")}
+   <div class="sub-head" style="margin-top:18px"><h3>Iniciar un año nuevo</h3><p>Se copian la estrategia, los valores, las funciones, los procesos, los nombres de KPIs y los conceptos del presupuesto. Las cifras, Rocks y colecciones empiezan en blanco.</p></div>
+   <div class="newyear"><div><label class="label" for="ny-year">Año</label><input id="ny-year" class="fld num" type="number" value="${next}"></div>
+    <div><label class="label" for="ny-from">Copiar estrategia de</label><select id="ny-from" class="fld">${ys.slice().reverse().map(y=>`<option value="${y}">${y}</option>`).join("")}<option value="">Empezar en blanco</option></select></div>
+    <div><button class="btn primary" data-act="create-year" data-safe="1" style="width:100%;justify-content:center">Crear año</button></div></div>
+   <p class="hint" id="ny-msg" style="margin:8px 0 0"></p>
+   ${backupSection()}
+  </div></div>`;
+}
+function copyForNewYear(src,anio){
+  const b=blank(anio); if(!src) return b; const s=JSON.parse(JSON.stringify(src));
+  b.empresa=Object.assign({},s.empresa,{resumen:""});
+  b.estrategia=s.estrategia; b.fdt=s.fdt; b.personas=s.personas; b.ritmo=s.ritmo;
+  b.riesgos=s.riesgos.map(r=>Object.assign({},r,{id:uid()}));
+  b.kpis=s.kpis.map(k=>({id:uid(),nombre:k.nombre,unidad:k.unidad,tipo:k.tipo,menor:k.menor,meta:n4(),real:n4()}));
+  for(const g of ["canales","costos","gastos"]) b.presupuesto[g]=s.presupuesto[g].map(r=>({id:uid(),nombre:r.nombre,v:n4(),r:n4()}));
+  b.efectivo=Object.assign({},s.efectivo);
+  b.objetivos=s.objetivos.map(o=>({id:uid(),obj:o.obj,indicador:o.indicador,meta:"",resp:o.resp}));
+  return b;
+}
+
+/* ============ render ============ */
+const app=document.getElementById("app");
+const isRO=()=>!!state.cerrado||readOnly;
+function renderHeader(){
+  const ys=sortedYears(),s=document.getElementById("year-select");
+  s.innerHTML=ys.map(y=>`<option value="${y}"${yid(y)===cur?" selected":""}>${y}</option>`).join("");
+  document.getElementById("year-tag").innerHTML=state.ejemplo?'<span class="tag ej">Ejemplo</span>':state.cerrado?'<span class="tag">Cerrado</span>':"";
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l])=>`<button class="tab" role="tab" id="tab-${k}" aria-selected="${k===tab}" data-tab="${k}">${l}</button>`).join("");
+}
+function render(){
+  renderHeader();
+  chartQueue.length=0;
+  let h="";
+  if(state.cerrado) h+=`<div class="robar"><span>El año ${state.anio} está cerrado y se muestra como historial.</span><button class="btn small" data-act="toggle-close" data-y="${state.anio}" data-safe="1">Reabrir para editar</button></div>`;
+  else if(readOnly) h+=`<div class="robar"><span>Tienes acceso de solo lectura a este plan.</span></div>`;
+  app.innerHTML=h+V[tab]();
+  document.body.classList.toggle("ro",isRO());
+  if(isRO()) app.querySelectorAll("input,textarea,select").forEach(el=>el.disabled=true);
+  runCalc();
+  drawCharts();
+  document.getElementById("overlay-root").innerHTML=showYears?yearsModal():"";
+}
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest("[data-tab]"); if(!b) return; goto(b.dataset.tab); b.scrollIntoView({block:"nearest",inline:"nearest"});
+});
+function goto(t){tab=t; try{localStorage.setItem("pe-tab",tab)}catch(_){} render(); window.scrollTo({top:0});}
+document.getElementById("year-select").addEventListener("change",e=>openYear(+e.target.value));
+document.getElementById("btn-years").addEventListener("click",()=>{showYears=true;histList=null;pendingImport=null;render();loadHist();});
+
+function onField(e){
+  const el=e.target,p=el.dataset&&el.dataset.bind; if(!p||isRO()) return;
+  let v=el.value;
+  if(el.dataset.t==="num") v=v===""?null:(isNaN(+v)?null:+v);
+  else if(el.dataset.t==="bool") v=el.checked;
+  else if(/\.(mayor|menor)$/.test(p)) v=(v==="true");
+  set(p,v); touch();
+  if(el.classList.contains("estado")){el.dataset.s=v;const card=el.closest(".rock");if(card)card.dataset.s=v;}
+  runCalc();
+}
+app.addEventListener("input",onField);
+app.addEventListener("change",e=>{if(e.target.tagName==="SELECT"||e.target.type==="checkbox")onField(e);});
+
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-goto]"); if(g){goto(g.dataset.goto);return;}
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const a=b.dataset.act;
+  if(a==="close-years"){ if(e.target!==b&&b.classList.contains("overlay")) return; showYears=false; render(); return; }
+  if(a==="qsel"){qSel=+b.dataset.q;render();return;}
+  if(a==="pmode"){pmode=b.dataset.m;try{localStorage.setItem("pe-pmode",pmode)}catch(_){}render();return;}
+  if(a==="open-year"){showYears=false;openYear(+b.dataset.y);return;}
+  if(a==="toggle-close"){toggleClose(+b.dataset.y);return;}
+  if(a==="del-year"){ if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Eliminar? Confirmar";setTimeout(()=>{if(b.isConnected){b.dataset.armed="0";b.textContent="Eliminar"}},4000);return;} deleteYear(+b.dataset.y);return;}
+  if(a==="create-year"){createYear();return;}
+  if(a==="clear-examples"){ if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="¿Borrar todos los ejemplos? Confirmar";setTimeout(()=>{if(b.isConnected){b.dataset.armed="0";b.textContent="Borrar ejemplos y empezar mi plan"}},4000);return;} clearExamples();return;}
+  if(!app.contains(b)||isRO()) return;
+  if(a==="del"){get(b.dataset.list).splice(+b.dataset.i,1);}
+  else if(a==="add-str"){get(b.dataset.list).push("");}
+  else if(a==="add-meta35"){state.estrategia.metas35.push({id:uid(),meta:"",indicador:""});}
+  else if(a==="add-promesa"){state.estrategia.promesas.push({id:uid(),promesa:"",kpi:""});}
+  else if(a==="add-obj"){state.objetivos.push({id:uid(),obj:"",indicador:"",meta:"",resp:""});}
+  else if(a==="add-rock"){state.trimestres[+b.dataset.q].rocks.push({id:uid(),t:"",dueno:"",fin:"",o:"",area:"",estado:"sin"});}
+  else if(a==="add-col"){state.colecciones.push({id:uid(),nombre:"",linea:"",unidades:null,etapas:ETAPAS.map(()=>({q:"",e:0}))});}
+  else if(a==="cycle-stage"){const s=state.colecciones[+b.dataset.c].etapas[+b.dataset.j];s.e=((s.e||0)+1)%3;}
+  else if(a==="add-kpi"){state.kpis.push({id:uid(),nombre:"",unidad:"#",tipo:"Promedio",menor:false,meta:n4(),real:n4()});}
+  else if(a==="add-row"){state.presupuesto[b.dataset.g].push({id:uid(),nombre:"",v:n4(),r:n4()});}
+  else if(a==="add-face"){state.personas.face.push({id:uid(),funcion:"",resp:"",kpis:""});}
+  else if(a==="add-pace"){state.personas.pace.push({id:uid(),proceso:"",dueno:"",pasos:"",kpi:""});}
+  else if(a==="add-riesgo"){state.riesgos.push({id:uid(),riesgo:"",trim:"T1",impacto:"Medio",mitigacion:"",resp:""});}
+  else if(a==="add-ritmo"){state.ritmo.push({id:uid(),reunion:"",cuando:"",quien:"",agenda:""});}
+  else return;
+  touch(); render();
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&showYears){showYears=false;render();}});
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+
+/* ============ persistence (Supabase) ============ */
+const CFG=window.PLAN_CONFIG||{};
+let sb=null,me=null,role=null,saveTimer=null,saving=false,lastJSON="",readOnly=false,remotePending=null,offlineDirty=false,retryTimer=null;
+let histList=null,deletedList=[],pendingImport=null,channel=null;
+const SESSION=uid()+uid();let localRev=0;
+const clone=o=>JSON.parse(JSON.stringify(o));
+function stamp(d){d._by=SESSION;d._rev=++localRev;return d;}
+const statusEl=document.getElementById("status"),statusT=document.getElementById("status-t");
+function setStatus(s){statusEl.dataset.s=s;statusT.textContent={saved:"Guardado",saving:"Guardando…",offline:"Sin conexión · se guardará al reconectar",error:"No se pudo guardar",ro:"Solo lectura",loading:"Cargando…"}[s]||"";}
+function saveDirty(){try{localStorage.setItem("pe-dirty",JSON.stringify({id:cur,email:me&&me.email,at:new Date().toISOString(),data:state}))}catch(e){}}
+function clearDirty(){try{localStorage.removeItem("pe-dirty")}catch(e){}}
+
+async function upsert(id,data){const {error}=await sb.from("planes").upsert({id,data});if(error)throw error;}
+async function removeDoc(id){const {error}=await sb.from("planes").delete().eq("id",id);if(error)throw error;}
+async function writeDoc(id,data){await upsert(id,stamp(data));}
+
+function touch(){
+  if(isRO()) return;
+  years[cur]=clone(state);
+  saveDirty();
+  setStatus("saving"); clearTimeout(saveTimer); saveTimer=setTimeout(flush,700);
+}
+async function flush(){
+  saveTimer=null; if(saving){saveTimer=setTimeout(flush,400);return;}
+  saving=true; const id=cur,data=stamp(clone(state)); lastJSON=JSON.stringify(data);
+  try{await upsert(id,data); offlineDirty=false; clearDirty(); if(!saveTimer) setStatus("saved");}
+  catch(e){handleSaveError(e);}
+  finally{saving=false;}
+}
+function handleSaveError(e){
+  const code=(e&&e.code)||"",msg=(e&&e.message)||"";
+  if(code==="42501"||/row-level security|permission denied/i.test(msg)){readOnly=true;setStatus("ro");render();toast("Tu usuario no tiene permiso para editar.");return;}
+  offlineDirty=true; setStatus("offline");
+  clearTimeout(retryTimer); retryTimer=setTimeout(()=>{if(!saveTimer)saveTimer=setTimeout(flush,0)},8000);
+}
+async function flushNow(){ if(saveTimer){clearTimeout(saveTimer);await flush();} }
+addEventListener("online",()=>{if(offlineDirty&&!saveTimer)saveTimer=setTimeout(flush,0)});
+addEventListener("beforeunload",e=>{if(saveTimer||saving||offlineDirty){e.preventDefault();e.returnValue="";}});
+const isEditing=()=>{const a=document.activeElement;return a&&app.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)};
+app.addEventListener("focusout",()=>setTimeout(()=>{if(remotePending&&!isEditing()&&!saveTimer&&!saving){const d=remotePending;remotePending=null;state=normalize(d);render();}},0));
+
+async function loadAll(){
+  const {data,error}=await sb.from("planes").select("id,data,updated_at");
+  if(error) throw error;
+  const next={},meta={}; (data||[]).forEach(r=>{if(/^y\d{4}$/.test(r.id)){next[r.id]=r.data;meta[r.id]=r.updated_at;}});
+  return {next,meta};
+}
+function applyRemote(id,d){
+  if(id!==cur){years[id]=d; if(!isEditing()&&(showYears||tab==="graficas"||tab==="tablero")) render(); else renderHeader(); return;}
+  if(d&&d._by===SESSION) return;            // our own save coming back
+  if(saveTimer||saving||offlineDirty) return; // we have newer local changes
+  if(isEditing()){remotePending=d;years[cur]=d;return;}
+  years[cur]=d; state=normalize(d); lastJSON=JSON.stringify(d); render(); setStatus(readOnly?"ro":"saved");
+}
+function subscribe(){
+  if(channel) return;
+  channel=sb.channel("planes-cambios").on("postgres_changes",{event:"*",schema:"public",table:"planes"},p=>{
+    if(p.eventType==="DELETE"){const id=p.old&&p.old.id; if(id&&years[id]){delete years[id]; if(id===cur&&!saveTimer&&!saving){pickAfterDelete();} render();} return;}
+    const row=p.new; if(!row||!/^y\d{4}$/.test(row.id)) return; applyRemote(row.id,row.data);
+  }).subscribe();
+}
+// When the tab comes back to the front, reload to catch anything realtime missed.
+document.addEventListener("visibilitychange",async()=>{
+  if(document.visibilityState!=="visible"||!me||!role) return;
+  try{const {next}=await loadAll(); for(const id of Object.keys(years)) if(!(id in next)&&id!==cur) delete years[id]; for(const [id,d] of Object.entries(next)){ const same=JSON.stringify(years[id])===JSON.stringify(d); if(!same) applyRemote(id,d);} }catch(e){}
+});
+function pickAfterDelete(){const ys=sortedYears().filter(n=>years[yid(n)]); if(ys.length){cur=yid(ys[ys.length-1]);state=normalize(years[cur]);} else {cur=yid(THIS_YEAR);state=normalize(blank(THIS_YEAR));}}
+
+async function openYear(y){
+  if(offlineDirty){toast("Sin conexión: espera a que se guarden tus cambios antes de cambiar de año.");renderHeader();return;}
+  await flushNow();
+  const id=yid(y); if(!years[id]&&id!==cur) return;
+  cur=id; state=normalize(years[id]); lastJSON=JSON.stringify(years[id]); qSel=null; histList=null;
+  try{localStorage.setItem("pe-year",id)}catch(_){}
+  render(); if(showYears) loadHist();
+}
+async function createYear(){
+  if(readOnly){toast("Tu acceso es de solo lectura.");return;}
+  const y=+document.getElementById("ny-year").value,from=document.getElementById("ny-from").value,msg=document.getElementById("ny-msg");
+  if(!y||y<2000||y>2100){msg.textContent="Escribe un año válido.";return;}
+  if(years[yid(y)]){msg.textContent=`El año ${y} ya existe. Ábrelo desde la lista.`;return;}
+  await flushNow();
+  const src=from?yearData(yid(+from)):null;
+  const d=copyForNewYear(src,y); d.ejemplo=false;
+  try{await writeDoc(yid(y),d);}catch(e){msg.textContent="No se pudo crear el año. Revisa tu conexión o tu permiso de edición.";return;}
+  years[yid(y)]=d; showYears=false; await openYear(y); toast(`Año ${y} creado`);
+}
+async function toggleClose(y){
+  if(readOnly){toast("Tu acceso es de solo lectura.");return;}
+  const id=yid(y),d=id===cur?state:normalize(years[id]); d.cerrado=!d.cerrado;
+  if(id===cur){state=d;}
+  years[id]=clone(d);
+  try{await writeDoc(id,years[id]);}catch(e){toast("No se pudo guardar el cambio");}
+  if(id===cur) lastJSON=JSON.stringify(years[id]);
+  render(); toast(d.cerrado?`Año ${y} cerrado`:`Año ${y} reabierto`);
+}
+async function deleteYear(y){
+  if(readOnly){toast("Tu acceso es de solo lectura.");return;}
+  const id=yid(y);
+  try{ await removeDoc(id); }catch(e){toast("No se pudo eliminar");return;}
+  delete years[id];
+  if(id===cur) pickAfterDelete();
+  render(); loadHist(); toast(`Año ${y} eliminado. Puedes recuperarlo desde “Años eliminados”.`);
+}
+async function clearExamples(){
+  if(readOnly){toast("Tu acceso es de solo lectura.");return;}
+  await flushNow();
+  const ids=Object.keys(years).filter(id=>years[id]&&years[id].ejemplo);
+  for(const id of ids){ try{ await removeDoc(id); }catch(e){} delete years[id]; }
+  if(!years[yid(THIS_YEAR)]){ const d=blank(THIS_YEAR); years[yid(THIS_YEAR)]=d; try{await writeDoc(yid(THIS_YEAR),d);}catch(e){} }
+  cur=yid(THIS_YEAR); state=normalize(years[cur]); lastJSON=JSON.stringify(years[cur]); tab="estrategia"; render(); toast(`Plan ${THIS_YEAR} listo. Empieza por la estrategia.`);
+}
+
+/* ---- backups, history, import ---- */
+function downloadFile(name,text,type){
+  const blob=new Blob([text],{type}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},800);
+}
+function backupAll(){
+  const all=clone(years); all[cur]=clone(state);
+  const stampDate=new Date().toISOString().slice(0,10);
+  downloadFile(`respaldo-plan-estrategico-${stampDate}.json`,JSON.stringify({app:"plan-estrategico",formato:1,exportado:new Date().toISOString(),years:all},null,1),"application/json");
+  toast("Respaldo descargado");
+}
+const fmtDate=s=>{try{return new Date(s).toLocaleString("es-GT",{dateStyle:"medium",timeStyle:"short"})}catch(e){return s}};
+async function loadHist(){
+  if(!sb) return;
+  const a=await sb.from("planes_historial").select("id,plan_id,guardado_en,guardado_por,op").eq("plan_id",cur).order("guardado_en",{ascending:false}).limit(20);
+  histList=a.error?[]:a.data||[];
+  const b=await sb.from("planes_historial").select("id,plan_id,guardado_en,guardado_por,op").eq("op","DELETE").order("guardado_en",{ascending:false}).limit(30);
+  const seen=new Set(); deletedList=(b.error?[]:b.data||[]).filter(h=>!years[h.plan_id]&&!seen.has(h.plan_id)&&seen.add(h.plan_id));
+  if(showYears) render();
+}
+async function restoreVersion(hid){
+  if(readOnly){toast("Tu acceso es de solo lectura.");return;}
+  const {data,error}=await sb.from("planes_historial").select("plan_id,data").eq("id",hid).single();
+  if(error||!data){toast("No se pudo leer esa versión");return;}
+  await flushNow();
+  const id=data.plan_id,d=clone(data.data);
+  try{await writeDoc(id,d);}catch(e){toast("No se pudo restaurar");return;}
+  years[id]=d; cur=id; state=normalize(d); lastJSON=JSON.stringify(d); showYears=false;
+  render(); toast(`Año ${id.slice(1)} restaurado`);
+}
+async function handleImportFile(file){
+  if(!file) return;
+  try{
+    const obj=JSON.parse(await file.text());
+    let plans={};
+    if(obj&&obj.years&&typeof obj.years==="object") plans=obj.years;
+    else if(obj&&obj.anio) plans[yid(obj.anio)]=obj;
+    const ids=Object.keys(plans).filter(id=>/^y\d{4}$/.test(id)&&plans[id]&&plans[id].anio);
+    if(!ids.length){toast("Ese archivo no es un respaldo del plan.");return;}
+    pendingImport={plans,ids:ids.sort(),replace:ids.filter(id=>years[id])};
+  }catch(e){toast("No se pudo leer el archivo.");return;}
+  render();
+}
+async function confirmImport(){
+  if(!pendingImport||readOnly) return;
+  await flushNow();
+  let ok=0;
+  for(const id of pendingImport.ids){ const d=clone(pendingImport.plans[id]); try{await writeDoc(id,d);years[id]=d;ok++;}catch(e){} }
+  if(years[cur]){state=normalize(years[cur]);lastJSON=JSON.stringify(years[cur]);}
+  else if(pendingImport.ids.length){cur=pendingImport.ids[pendingImport.ids.length-1];state=normalize(years[cur]);}
+  pendingImport=null; render(); loadHist(); toast(`${ok} año(s) importado(s)`);
+}
+function backupSection(){
+  const yrs=pendingImport?pendingImport.ids.map(i=>i.slice(1)).join(", "):"";
+  return `<div class="sub-head" style="margin-top:22px"><h3>Respaldos</h3><p>Descarga una copia de todos los años en un archivo y guárdala en tu computadora o en Drive. Con ella puedes recuperar todo en cualquier momento.</p></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" data-act="backup-dl" data-safe="1">Descargar respaldo</button>
+    <button class="btn ghost" data-act="csv-dl" data-safe="1">Descargar ${state.anio} en CSV (Excel)</button>
+    ${readOnly?"":`<label class="btn ghost" style="cursor:pointer">Importar respaldo…<input type="file" id="imp-file" accept=".json,application/json" hidden></label>`}
+  </div>
+  ${pendingImport?`<div class="warnbox" style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>El archivo trae: <b>${yrs}</b>. ${pendingImport.replace.length?`Se reemplazarán: <b>${pendingImport.replace.map(i=>i.slice(1)).join(", ")}</b> (la versión actual queda en el historial).`:"No reemplaza ningún año existente."}</span><button class="btn small primary" data-act="import-confirm" data-safe="1">Importar</button><button class="btn small ghost" data-act="import-cancel" data-safe="1">Cancelar</button></div>`:""}
+  <div class="sub-head" style="margin-top:22px"><h3>Versiones anteriores de ${state.anio}</h3><p>Se guarda una copia automática cada 15 minutos mientras alguien trabaja, y siempre antes de borrar un año.</p></div>
+  ${histList==null?'<p class="hint">Cargando…</p>':histList.length?histList.map(h=>`<div class="yrow"><span style="font-family:var(--f-mono);font-size:13px">${esc(fmtDate(h.guardado_en))}</span><span class="hint">${esc(h.guardado_por||"")}${h.op==="DELETE"?" · antes de eliminar":""}</span><span class="sp"></span>${readOnly?"":`<button class="btn small ghost" data-act="restore" data-h="${h.id}" data-safe="1" data-armed="0">Restaurar</button>`}</div>`).join(""):'<p class="hint">Aún no hay versiones anteriores de este año.</p>'}
+  ${deletedList.length?`<div class="sub-head" style="margin-top:22px"><h3>Años eliminados</h3><p>Puedes recuperarlos tal como estaban antes de borrarlos.</p></div>${deletedList.map(h=>`<div class="yrow"><span class="y">${esc(h.plan_id.slice(1))}</span><span class="hint">eliminado el ${esc(fmtDate(h.guardado_en))}${h.guardado_por?` por ${esc(h.guardado_por)}`:""}</span><span class="sp"></span>${readOnly?"":`<button class="btn small" data-act="restore" data-h="${h.id}" data-safe="1" data-armed="0">Recuperar</button>`}</div>`).join("")}`:""}`;
+}
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="imp-file") handleImportFile(e.target.files[0]);});
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-act]"); if(!b) return;
+  const a=b.dataset.act;
+  if(a==="backup-dl") backupAll();
+  else if(a==="csv-dl") downloadFile(`plan-estrategico-${state.anio}.csv`,"﻿"+toCSV(),"text/csv");
+  else if(a==="import-confirm") confirmImport();
+  else if(a==="import-cancel"){pendingImport=null;render();}
+  else if(a==="restore"){
+    if(b.dataset.armed!=="1"){const t=b.textContent;b.dataset.armed="1";b.textContent="¿Confirmar?";setTimeout(()=>{if(b.isConnected){b.dataset.armed="0";b.textContent=t}},4000);return;}
+    restoreVersion(+b.dataset.h);
+  }
+});
+
+/* ---- sign-in gate ---- */
+const gate=document.getElementById("gate");
+function showGate(mode,info){
+  document.body.classList.add("gated"); gate.hidden=false;
+  const head=`<h1>Plan estratégico</h1>`;
+  const forms={
+    config:`${head}<p>Falta conectar el programa con Supabase. Abre el archivo <b>config.js</b> y pega la URL y la clave pública (anon) de tu proyecto, como explica la guía.</p>`,
+    login:`${head}<p class="hint">Entra con el correo y la contraseña que te dio el administrador.</p>
+      <form id="f-login"><label class="fl"><span>Correo</span><input class="fld" id="g-email" type="email" autocomplete="email" required></label>
+      <label class="fl"><span>Contraseña</span><input class="fld" id="g-pass" type="password" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit" style="justify-content:center">Entrar</button>
+      <button class="linkbtn" type="button" data-gate="forgot">Olvidé mi contraseña</button></form>`,
+    forgot:`${head}<p class="hint">Te enviaremos un correo con un enlace para crear una contraseña nueva.</p>
+      <form id="f-forgot"><label class="fl"><span>Correo</span><input class="fld" id="g-email" type="email" autocomplete="email" required></label>
+      <button class="btn primary" type="submit" style="justify-content:center">Enviar enlace</button>
+      <button class="linkbtn" type="button" data-gate="login">Volver</button></form>`,
+    newpass:`${head}<p class="hint">Escribe tu contraseña nueva (mínimo 8 caracteres).</p>
+      <form id="f-newpass"><label class="fl"><span>Contraseña nueva</span><input class="fld" id="g-p1" type="password" minlength="8" autocomplete="new-password" required></label>
+      <label class="fl"><span>Repite la contraseña</span><input class="fld" id="g-p2" type="password" minlength="8" autocomplete="new-password" required></label>
+      <button class="btn primary" type="submit" style="justify-content:center">Guardar contraseña</button></form>`,
+    noaccess:`${head}<p>El correo <b>${esc(info||"")}</b> no está en la lista de miembros del plan. Pide al administrador que lo agregue.</p><button class="btn" data-gate="logout">Salir</button>`,
+    error:`${head}<p>No se pudo conectar con la base de datos.</p><p class="hint">${esc(info||"")}</p><button class="btn" data-gate="retry">Reintentar</button>`
+  };
+  gate.innerHTML=`<div class="card">${forms[mode]||forms.login}<p class="hint" id="g-msg" style="margin:10px 0 0;min-height:1.2em"></p></div>`;
+  const f=gate.querySelector("input"); if(f) f.focus();
+}
+function hideGate(){document.body.classList.remove("gated");gate.hidden=true;gate.innerHTML="";}
+const gmsg=t=>{const m=document.getElementById("g-msg");if(m)m.textContent=t;};
+gate.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-gate]"); if(!b) return;
+  const g=b.dataset.gate;
+  if(g==="logout"){await sb.auth.signOut();showGate("login");}
+  else if(g==="retry"){location.reload();}
+  else showGate(g);
+});
+gate.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const id=e.target.id;
+  if(id==="f-login"){
+    gmsg("Entrando…");
+    const {data,error}=await sb.auth.signInWithPassword({email:document.getElementById("g-email").value.trim(),password:document.getElementById("g-pass").value});
+    if(error){gmsg(/invalid/i.test(error.message)?"Correo o contraseña incorrectos.":error.message);return;}
+    enter(data.user);
+  } else if(id==="f-forgot"){
+    const {error}=await sb.auth.resetPasswordForEmail(document.getElementById("g-email").value.trim(),{redirectTo:location.origin+location.pathname});
+    gmsg(error?error.message:"Listo. Revisa tu correo y abre el enlace.");
+  } else if(id==="f-newpass"){
+    const p1=document.getElementById("g-p1").value,p2=document.getElementById("g-p2").value;
+    if(p1!==p2){gmsg("Las contraseñas no coinciden.");return;}
+    const {data,error}=await sb.auth.updateUser({password:p1});
+    if(error){gmsg(error.message);return;}
+    history.replaceState(null,"",location.pathname); enter(data.user);
+  }
+});
+document.getElementById("btn-logout").addEventListener("click",async()=>{
+  await flushNow();
+  if(offlineDirty){toast("Hay cambios sin guardar. Espera a tener conexión antes de salir.");return;}
+  if(channel){sb.removeChannel(channel);channel=null;}
+  await sb.auth.signOut(); me=null; role=null; years={}; showGate("login");
+});
+
+async function enter(user){
+  me=user;
+  const email=(user.email||"").toLowerCase();
+  const {data:m,error:me_err}=await sb.from("miembros").select("rol,nombre").eq("email",email).maybeSingle();
+  if(me_err){showGate("error",me_err.message);return;}
+  if(!m){showGate("noaccess",email);return;}
+  role=m.rol; readOnly=role!=="editor";
+  document.getElementById("who").textContent=m.nombre||email;
+  hideGate(); setStatus("loading");
+  let meta={};
+  try{const r=await loadAll(); years=r.next; meta=r.meta;}catch(e){showGate("error",e.message);return;}
+  // Recover edits that never reached the server (window closed while offline, etc.)
+  try{
+    const dirty=JSON.parse(localStorage.getItem("pe-dirty")||"null");
+    if(dirty&&dirty.data&&dirty.email===user.email&&!readOnly){
+      const serverAt=meta[dirty.id]?Date.parse(meta[dirty.id]):0;
+      if(Date.parse(dirty.at)>serverAt){ await writeDoc(dirty.id,clone(dirty.data)); years[dirty.id]=dirty.data; toast("Se recuperaron cambios que no se habían guardado."); }
+    }
+    clearDirty();
+  }catch(e){}
+  cur=pickInitial(); state=normalize(years[cur]||blank(+cur.slice(1)));
+  lastJSON=JSON.stringify(years[cur]||null);
+  render(); setStatus(readOnly?"ro":"saved"); subscribe();
+}
+function pickInitial(){
+  let pref=null; try{pref=localStorage.getItem("pe-year")}catch(_){}
+  if(pref&&years[pref]) return pref;
+  if(years[yid(THIS_YEAR)]) return yid(THIS_YEAR);
+  const ys=Object.keys(years).sort(); return ys.length?ys[ys.length-1]:yid(THIS_YEAR);
+}
+async function boot(){
+  if(!CFG.supabaseUrl||!CFG.supabaseAnonKey||/PEGA_AQUI/.test(CFG.supabaseUrl+CFG.supabaseAnonKey)||!window.supabase){showGate("config");return;}
+  sb=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
+  let recovering=/type=recovery/.test(location.hash);
+  sb.auth.onAuthStateChange(ev=>{ if(ev==="PASSWORD_RECOVERY"){recovering=true;showGate("newpass");} });
+  const {data:{session}}=await sb.auth.getSession();
+  if(recovering){showGate("newpass");return;}
+  if(!session){showGate("login");return;}
+  await enter(session.user);
+}
+
+function toCSV(){
+  const rows=[],q=s=>{s=s==null?"":String(s);return /[",\n;]/.test(s)?`"${s.replace(/"/g,'""')}"`:s},R=(...c)=>rows.push(c.map(q).join(","));
+  const d=state,E=d.estrategia,bp=budget(d,"plan"),br=budget(d,"real");
+  R("PLAN ESTRATÉGICO",d.anio);R("Empresa",d.empresa.nombre);R("Resumen",d.empresa.resumen);R();
+  R("ESTRATEGIA");R("Propósito",E.proposito);R("Valores",E.valores.filter(Boolean).join(" | "));R("BHAG",E.bhag);E.metas35.forEach(m=>R("Meta 3-5 años",m.meta,m.indicador));R("Terreno de juego",E.terreno);R("Estrategia en una frase",E.frase);R("Factor X",E.factorX);R();
+  R("FDT","Fortalezas","Debilidades","Tendencias");const mx=Math.max(d.fdt.f.length,d.fdt.d.length,d.fdt.t.length);for(let i=0;i<mx;i++)R("",d.fdt.f[i],d.fdt.d[i],d.fdt.t[i]);R();
+  R("OBJETIVOS","Objetivo","Indicador","Meta","Responsable");d.objetivos.forEach((o,i)=>R("O"+(i+1),o.obj,o.indicador,o.meta,o.resp));R();
+  R("TRIMESTRES","Tema","Número crítico","Real","Estado");d.trimestres.forEach((t,i)=>R(QL(i),t.tema,t.cn.nombre,t.cn.real,CN_L[cnState(t.cn)]||""));R();
+  R("ROCKS","Trimestre","Rock","Dueño","Estado","Objetivo");d.trimestres.forEach((t,i)=>t.rocks.forEach(r=>R("",QL(i),r.t,r.dueno,(ROCK_E.find(x=>x[0]===r.estado)||ROCK_E[0])[1],objLabel(r.o))));R();
+  R("KPIs","Unidad",...[0,1,2,3].flatMap(i=>["Meta "+QL(i),"Real "+QL(i)]));d.kpis.forEach(k=>R(k.nombre,k.unidad,...[0,1,2,3].flatMap(i=>[k.meta[i],k.real[i]])));R();
+  const B=(l,a,t)=>R(l,...a.map(v=>v==null?"":Math.round(v)),t==null?"":Math.round(t));
+  R("PRESUPUESTO PLAN (Q)","T1","T2","T3","T4","Total");d.presupuesto.canales.forEach(c=>B(c.nombre,c.v.map(z),sum(c.v)));B("Ventas totales",bp.ing,bp.T.ing);B("Costo de ventas",bp.cos,bp.T.cos);B("Gastos operativos",bp.gt,bp.T.gt);B("Utilidad operativa",bp.uo,bp.T.uo);R();
+  R("RESULTADOS REALES (Q)","T1","T2","T3","T4","Total");d.presupuesto.canales.forEach(c=>B(c.nombre,c.r.map(z),sum(c.r)));B("Ventas totales",br.ing,br.T.ing);B("Costo de ventas",br.cos,br.T.cos);B("Gastos operativos",br.gt,br.T.gt);B("Utilidad operativa",br.uo,br.T.uo);R();
+  R("RIESGOS","Trimestre","Impacto","Mitigación","Responsable");d.riesgos.forEach(r=>R(r.riesgo,r.trim,r.impacto,r.mitigacion,r.resp));
+  return rows.join("\r\n");
+}
+
+boot();
+})();
+</script>
+</body>
+</html>
