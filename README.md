@@ -56,8 +56,8 @@ Tiempo estimado de instalación: 30 a 40 minutos. No necesitas programar.
 
    ```js
    window.PLAN_CONFIG = {
-     supabaseUrl: "https://abcdefgh.supabase.co",
-     supabaseAnonKey: "eyJhbGciOi...tu-clave..."
+     supabaseUrl: "https://vmfcydqxxbzgaswkycol.supabase.co",
+     supabaseAnonKey: "sb_publishable_jzVMW6aSKcZyiIcQh6A7eg_F30VWppd"
    };
    ```
 
